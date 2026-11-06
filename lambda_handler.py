@@ -63,6 +63,10 @@ def _unpack(event):
         method = request_context["http"].get("method", "GET")
         path = event.get("rawPath") or "/"
         query = event.get("rawQueryString") or ""
+        stage = request_context.get("stage") or ""
+        prefix = f"/{stage}" if stage and stage != "$default" else ""
+        if prefix and (path == prefix or path.startswith(prefix + "/")):
+            path = path[len(prefix):] or "/"
     else:
         method = event.get("httpMethod", "GET")
         path = event.get("path") or "/"

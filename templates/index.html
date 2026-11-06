@@ -1462,6 +1462,10 @@
   <!-- JAVASCRIPT LOGIC -->
   <script>
     // Global State
+    // Amplify Hosting serves this page on its own domain. The API stays on API Gateway.
+    const API_BASE = location.hostname.endsWith("amplifyapp.com")
+      ? "https://72oafq6opl.execute-api.ap-southeast-2.amazonaws.com/prod"
+      : "";
     let currentLang = 'en';
     let globalAudioEnabled = true;
     let trendChartInstance = null;
@@ -1765,7 +1769,7 @@
     // Fetch Weather
     async function fetchWeather(lat, lon, name) {
       try {
-        const res = await fetch(`/api/weather?lat=${lat}&lon=${lon}&name=${encodeURIComponent(name)}`);
+        const res = await fetch(`${API_BASE}/api/weather?lat=${lat}&lon=${lon}&name=${encodeURIComponent(name)}`);
         const json = await res.json();
         if (json.status === 'success') {
           weatherDataCache = json;
@@ -1833,7 +1837,7 @@
       const crop = document.getElementById('mandi-filter-crop').value;
       const state = document.getElementById('mandi-filter-state').value;
       try {
-        const res = await fetch(`/api/mandi/prices?crop=${encodeURIComponent(crop)}&state=${encodeURIComponent(state)}`);
+        const res = await fetch(`${API_BASE}/api/mandi/prices?crop=${encodeURIComponent(crop)}&state=${encodeURIComponent(state)}`);
         const json = await res.json();
         if (json.status === 'success') {
           renderMandiTable(json.data);
@@ -1904,7 +1908,7 @@
     // Chart & Trend Loader
     async function loadPriceTrends(crop) {
       try {
-        const res = await fetch(`/api/mandi/trends?crop=${encodeURIComponent(crop)}`);
+        const res = await fetch(`${API_BASE}/api/mandi/trends?crop=${encodeURIComponent(crop)}`);
         const json = await res.json();
         if (json.status === 'success') {
           renderChart(json);
@@ -2003,7 +2007,7 @@
       const qty = parseFloat(document.getElementById('arb-quantity').value) || 50;
 
       try {
-        const res = await fetch('/api/mandi/recommend-best', {
+        const res = await fetch(`${API_BASE}/api/mandi/recommend-best`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -2079,7 +2083,7 @@
       const land = parseFloat(document.getElementById('crop-land').value) || 2.0;
 
       try {
-        const res = await fetch('/api/crop/recommend', {
+        const res = await fetch(`${API_BASE}/api/crop/recommend`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -2189,7 +2193,7 @@
       const typingId = appendTypingIndicator();
 
       try {
-        const res = await fetch('/api/advisor/chat', {
+        const res = await fetch(`${API_BASE}/api/advisor/chat`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: msg, language: currentLang })
@@ -2269,7 +2273,7 @@
       const land = parseFloat(document.getElementById('adv-land').value) || 2.5;
 
       try {
-        const res = await fetch('/api/crop/advisor-full', {
+        const res = await fetch(`${API_BASE}/api/crop/advisor-full`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -2351,7 +2355,7 @@
       const state = distOpt.getAttribute('data-state');
 
       try {
-        const res = await fetch('/api/climate/risk-assessment', {
+        const res = await fetch(`${API_BASE}/api/climate/risk-assessment`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -2443,7 +2447,7 @@
       const state = distOpt ? distOpt.getAttribute('data-state') : 'Maharashtra';
 
       try {
-        const res = await fetch('/api/market/intelligence', {
+        const res = await fetch(`${API_BASE}/api/market/intelligence`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
