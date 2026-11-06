@@ -1,0 +1,2545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgriMitra AI - Decision-Support Platform for Indian Farmers</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              200: '#bbf7d0',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+            },
+            harvest: {
+              400: '#fbbf24',
+              500: '#f59e0b',
+              600: '#d97706',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', 'Noto Sans Devanagari', sans-serif;
+    }
+    .badge-glow {
+      box-shadow: 0 0 12px rgba(34, 197, 94, 0.35);
+    }
+    .tab-active {
+      border-bottom: 3px solid #16a34a;
+      color: #166534;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+
+  <!-- TOP ANNOUNCEMENT & LANGUAGE BAR -->
+  <div class="bg-brand-900 text-brand-100 px-4 py-2 text-xs md:text-sm font-medium flex flex-wrap justify-between items-center gap-2 border-b border-brand-800">
+    <div class="flex items-center space-x-2">
+      <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+      <span id="announcement-text">🌾 National Agrometeorological & APMC Mandi Network Live • Supporting Sustainable & Resilient Agriculture</span>
+    </div>
+    <div class="flex items-center space-x-3">
+      <!-- MULTILINGUAL ACCESSIBILITY SELECTOR -->
+      <div class="flex items-center gap-1 bg-brand-800/90 rounded-xl p-1 border border-brand-700 shadow-inner">
+        <span class="text-[11px] font-bold text-brand-200 px-1.5 hidden lg:inline">Choose language:</span>
+        <button id="lang-en" onclick="setLanguage('en')" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-white text-brand-900 transition shadow">English</button>
+        <button id="lang-te" onclick="setLanguage('te')" class="px-2.5 py-1 rounded-lg text-xs font-bold text-brand-200 hover:text-white transition">తెలుగు</button>
+        <button id="lang-hi" onclick="setLanguage('hi')" class="px-2.5 py-1 rounded-lg text-xs font-bold text-brand-200 hover:text-white transition">हिन्दी</button>
+        <button id="lang-ta" onclick="setLanguage('ta')" class="px-2.5 py-1 rounded-lg text-xs font-bold text-brand-200 hover:text-white transition">தமிழ்</button>
+        <button id="lang-kn" onclick="setLanguage('kn')" class="px-2.5 py-1 rounded-lg text-xs font-bold text-brand-200 hover:text-white transition">ಕನ್ನಡ</button>
+      </div>
+      <button onclick="toggleAudioGlobal()" id="btn-audio-global" class="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-emerald-700/60 hover:bg-emerald-600 text-white text-xs transition">
+        <i data-lucide="volume-2" class="w-3.5 h-3.5"></i>
+        <span id="txt-voice-read">Voice Readout</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- NAVIGATION HEADER -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-700 to-emerald-500 flex items-center justify-center text-white shadow-md">
+            <i data-lucide="sprout" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h1 class="text-xl font-extrabold tracking-tight text-slate-900 flex items-center gap-1.5">
+              <span>AgriMitra AI</span>
+              <span class="text-[11px] bg-brand-100 text-brand-800 px-2 py-0.5 rounded-full font-bold uppercase tracking-wide">कृषि मित्र</span>
+            </h1>
+            <p class="text-[11px] text-slate-500 hidden sm:block">AI Climate Intelligence • Mandi Arbitrage • Crop Planning Decision Support</p>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+          <!-- LOCATION DROPDOWN -->
+          <div class="flex items-center bg-slate-100 rounded-xl px-3 py-1.5 border border-slate-200">
+            <i data-lucide="map-pin" class="w-4 h-4 text-emerald-600 mr-1.5"></i>
+            <select id="state-select" onchange="onLocationChange()" class="bg-transparent text-xs font-semibold text-slate-700 focus:outline-none cursor-pointer">
+              <option value="Maharashtra" data-lat="19.7515" data-lon="75.7139">Maharashtra (नाशिक / पुणे)</option>
+              <option value="Madhya Pradesh" data-lat="22.9734" data-lon="78.6569">Madhya Pradesh (इंदौर / भोपाल)</option>
+              <option value="Punjab" data-lat="31.1471" data-lon="75.3412">Punjab (खन्ना / लुधियाना)</option>
+              <option value="Haryana" data-lat="29.0588" data-lon="76.0856">Haryana (करनाल / हिसार)</option>
+              <option value="Rajasthan" data-lat="27.0238" data-lon="74.2179">Rajasthan (कोटा / जयपुर)</option>
+              <option value="Gujarat" data-lat="22.2587" data-lon="71.1924">Gujarat (राजकोट / ऊंझा)</option>
+              <option value="Uttar Pradesh" data-lat="26.8467" data-lon="80.9462">Uttar Pradesh (बरेली / आगरा)</option>
+              <option value="Karnataka" data-lat="15.3173" data-lon="75.7139">Karnataka (गুলబರ್గా / ಬೆಳಗಾವಿ)</option>
+              <option value="Andhra Pradesh" data-lat="15.9129" data-lon="79.7400">Andhra Pradesh (గుంటూరు / కర్నూలు)</option>
+            </select>
+          </div>
+          <button onclick="detectGPSLocation()" title="Use Current GPS" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition">
+            <i data-lucide="crosshair" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- TABS NAVIGATION -->
+      <nav class="flex space-x-6 overflow-x-auto text-sm border-t border-slate-100 scrollbar-none" id="main-nav">
+        <button onclick="switchTab('climate')" id="tab-climate" class="py-3 px-1 text-slate-600 hover:text-brand-700 font-medium flex items-center gap-2 border-b-2 border-transparent transition tab-active whitespace-nowrap">
+          <i data-lucide="cloud-sun-rain" class="w-4 h-4 text-emerald-600"></i>
+          <span class="tab-label-weather">Climate & Weather Advisory</span>
+        </button>
+        <button onclick="switchTab('climate-advisor-tool')" id="tab-climate-advisor-tool" class="py-3 px-1 text-slate-600 hover:text-brand-700 font-medium flex items-center gap-2 border-b-2 border-transparent transition whitespace-nowrap">
+          <i data-lucide="shield-alert" class="w-4 h-4 text-red-600"></i>
+          <span class="tab-label-climate-risk-adv">Climate Risk Advisor (आपदा सुरक्षा)</span>
+        </button>
+        <button onclick="switchTab('mandi')" id="tab-mandi" class="py-3 px-1 text-slate-600 hover:text-brand-700 font-medium flex items-center gap-2 border-b-2 border-transparent transition whitespace-nowrap">
+          <i data-lucide="trending-up" class="w-4 h-4 text-amber-600"></i>
+          <span class="tab-label-mandi">Mandi Live Prices & MSP</span>
+        </button>
+        <button onclick="switchTab('market-intel-tool')" id="tab-market-intel-tool" class="py-3 px-1 text-slate-600 hover:text-brand-700 font-medium flex items-center gap-2 border-b-2 border-transparent transition whitespace-nowrap">
+          <i data-lucide="line-chart" class="w-4 h-4 text-emerald-600"></i>
+          <span class="tab-label-market-intel font-bold text-emerald-800">Market Intelligence (मार्केट इंटेलिजेंस ⭐)</span>
+        </button>
+        <button onclick="switchTab('arbitrage')" id="tab-arbitrage" class="py-3 px-1 text-slate-600 hover:text-brand-700 font-medium flex items-center gap-2 border-b-2 border-transparent transition whitespace-nowrap">
+          <i data-lucide="truck" class="w-4 h-4 text-blue-600"></i>
+          <span class="tab-label-arbitrage">Where to Sell (Profit Arbitrage)</span>
+        </button>
+        <button onclick="switchTab('crop-engine')" id="tab-crop-engine" class="py-3 px-1 text-slate-600 hover:text-brand-700 font-medium flex items-center gap-2 border-b-2 border-transparent transition whitespace-nowrap">
+          <i data-lucide="layers" class="w-4 h-4 text-purple-600"></i>
+          <span class="tab-label-crop">What to Grow (Decision Matrix)</span>
+        </button>
+        <button onclick="switchTab('ai-advisor-tool')" id="tab-ai-advisor-tool" class="py-3 px-1 text-slate-600 hover:text-brand-700 font-medium flex items-center gap-2 border-b-2 border-transparent transition whitespace-nowrap">
+          <i data-lucide="sparkles" class="w-4 h-4 text-emerald-600"></i>
+          <span class="tab-label-ai-advisor">AI Crop Advisor (सटीक फसल व खाद)</span>
+        </button>
+        <button onclick="switchTab('advisor')" id="tab-advisor" class="py-3 px-1 text-slate-600 hover:text-brand-700 font-medium flex items-center gap-2 border-b-2 border-transparent transition whitespace-nowrap">
+          <i data-lucide="bot" class="w-4 h-4 text-emerald-600"></i>
+          <span class="tab-label-advisor">AgriMitra AI Assistant</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- MAIN BODY -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- ALERT BANNER (CYCLONE / UNSEASONAL RAIN / PEST WARNING) -->
+    <div id="weather-alert-banner" class="hidden mb-6 bg-gradient-to-r from-amber-500/10 via-amber-500/20 to-red-500/10 border-l-4 border-amber-500 p-4 rounded-xl shadow-sm flex items-start space-x-3">
+      <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5"></i>
+      <div class="flex-1">
+        <h4 id="alert-title" class="font-bold text-amber-900 text-sm">Agrometeorological Warning: High Precipitation / Pest Surge Warning</h4>
+        <p id="alert-desc" class="text-xs text-amber-800 mt-0.5">Unseasonal rainfall expected over next 72 hours. Protect harvested grains, ensure drainage in cotton and soybean fields, and postpone chemical sprays.</p>
+      </div>
+      <button onclick="speakText(document.getElementById('alert-desc').innerText)" class="px-2.5 py-1 bg-amber-200/80 hover:bg-amber-300 rounded text-amber-900 text-xs font-semibold flex items-center gap-1 transition">
+        <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> <span class="txt-listen">Listen</span>
+      </button>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 1: CLIMATE INTELLIGENCE & WEATHER      -->
+    <!-- ========================================== -->
+    <section id="panel-climate" class="space-y-6">
+      <!-- Current Weather Hero Card -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Live Conditions Card -->
+        <div class="lg:col-span-2 bg-gradient-to-br from-emerald-800 via-brand-800 to-emerald-950 text-white rounded-2xl p-6 shadow-lg relative overflow-hidden">
+          <div class="absolute -right-10 -bottom-10 opacity-10 pointer-events-none">
+            <i data-lucide="sun-medium" class="w-64 h-64"></i>
+          </div>
+          
+          <div class="flex justify-between items-start">
+            <div>
+              <span id="weather-loc-tag" class="inline-block bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-semibold tracking-wide uppercase">
+                Maharashtra Regional Agro-Zone
+              </span>
+              <h2 id="weather-condition" class="text-3xl font-extrabold mt-2 tracking-tight">Mainly Clear</h2>
+              <p id="weather-advisory-cur" class="text-emerald-100 text-sm mt-1 max-w-xl">
+                Favorable conditions for field preparation and crop harvesting. Safe for spraying.
+              </p>
+            </div>
+            <div class="text-right">
+              <span id="weather-temp" class="text-5xl font-black tracking-tighter">31.4°C</span>
+              <p class="text-xs text-emerald-200 mt-1">Live Satellite & IMD Feed</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-5 border-t border-emerald-700/60">
+            <div class="bg-black/15 rounded-xl p-3 backdrop-blur-sm">
+              <span class="text-xs text-emerald-200 block">Humidity (आर्द्रता)</span>
+              <span id="weather-humidity" class="text-lg font-bold">58%</span>
+            </div>
+            <div class="bg-black/15 rounded-xl p-3 backdrop-blur-sm">
+              <span class="text-xs text-emerald-200 block">Rainfall (वर्षा)</span>
+              <span id="weather-rain" class="text-lg font-bold">0.0 mm</span>
+            </div>
+            <div class="bg-black/15 rounded-xl p-3 backdrop-blur-sm">
+              <span class="text-xs text-emerald-200 block">Wind (हवा की गति)</span>
+              <span id="weather-wind" class="text-lg font-bold">12.5 km/h</span>
+            </div>
+            <div class="bg-black/15 rounded-xl p-3 backdrop-blur-sm">
+              <span class="text-xs text-emerald-200 block">Spraying (छिड़काव)</span>
+              <span id="weather-spray" class="text-lg font-bold text-emerald-300">Favorable</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Climate Risk Matrix Card -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
+                <i data-lucide="shield-alert" class="w-5 h-5 text-emerald-600"></i>
+                <span class="txt-climate-risk-title">Climate Risk Guard</span>
+              </h3>
+              <span class="text-[11px] font-semibold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">AI Monitored</span>
+            </div>
+
+            <div class="space-y-3">
+              <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-7 h-7 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-xs">🌡️</div>
+                  <div>
+                    <span class="text-xs font-semibold block text-slate-700">Terminal Heat Stress</span>
+                    <span class="text-[10px] text-slate-500">Grain filling impact</span>
+                  </div>
+                </div>
+                <span id="risk-heat" class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">Low</span>
+              </div>
+
+              <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-7 h-7 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs">🐛</div>
+                  <div>
+                    <span class="text-xs font-semibold block text-slate-700">Pest & Blight Index</span>
+                    <span class="text-[10px] text-slate-500">Humidity & spore spread</span>
+                  </div>
+                </div>
+                <span id="risk-pest" class="text-xs font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800">Moderate</span>
+              </div>
+
+              <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-7 h-7 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-xs">🌾</div>
+                  <div>
+                    <span class="text-xs font-semibold block text-slate-700">Harvest Window Feasibility</span>
+                    <span class="text-[10px] text-slate-500">Combine thresher suitability</span>
+                  </div>
+                </div>
+                <span id="risk-harvest" class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">Excellent</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-100">
+            <button onclick="readAloudAdvisory()" class="w-full py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+              <i data-lucide="volume-2" class="w-4 h-4"></i>
+              <span id="btn-read-weather-advisory">Listen to Regional Farming Advisory</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7-Day Forecast Grid -->
+      <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
+            <i data-lucide="calendar" class="w-5 h-5 text-emerald-600"></i>
+            <span class="txt-7day-title">7-Day Farming Weather Forecast & Field Actions</span>
+          </h3>
+          <span class="text-xs text-slate-400">High-Resolution Open-Meteo & IMD Agromet</span>
+        </div>
+
+        <div id="forecast-container" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB: CLIMATE RISK ADVISOR                  -->
+    <!-- ========================================== -->
+    <section id="panel-climate-advisor-tool" class="hidden space-y-6">
+      <!-- Hero Banner -->
+      <div class="bg-gradient-to-r from-red-950 via-amber-950 to-slate-900 text-white rounded-2xl p-6 shadow-md relative overflow-hidden">
+        <div class="max-w-3xl">
+          <span class="bg-red-500/20 text-red-200 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider border border-red-400/30">
+            Multi-Hazard Climate Intelligence & Disaster Defense
+          </span>
+          <h2 class="text-2xl font-extrabold mt-2">AgriMitra Climate Risk Advisor</h2>
+          <p class="text-red-100 text-xs sm:text-sm mt-1 leading-relaxed">
+            Assess unseasonal rainfall, cyclones, terminal heatwaves, frost, and drought hazards across your crop's exact growth stage. Generate emergency pre/post disaster protocols and PMFBY insurance claims.
+          </p>
+        </div>
+      </div>
+
+      <!-- Assessment Input Filter Card -->
+      <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+        <h3 class="font-bold text-slate-900 text-base mb-4 flex items-center gap-2">
+          <i data-lucide="sliders" class="w-5 h-5 text-red-600"></i>
+          <span>Select Crop Growth Stage & Agro-Zone</span>
+        </h3>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Crop -->
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Target Crop (फसल)</label>
+            <select id="cra-crop" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-red-500 focus:outline-none">
+              <option value="Wheat" selected>Wheat (गेहूं)</option>
+              <option value="Soyabean">Soyabean (सोयाबीन)</option>
+              <option value="Cotton">Cotton (कपास)</option>
+              <option value="Mustard">Mustard (सरसों)</option>
+              <option value="Onion">Onion (प्याज)</option>
+              <option value="Tomato">Tomato (टमाटर)</option>
+              <option value="Paddy (Rice)">Paddy / Rice (धान)</option>
+              <option value="Chana (Gram)">Chana (चना)</option>
+              <option value="Bajra">Bajra (बाजरा)</option>
+              <option value="Tur (Arhar)">Tur / Arhar (अरहर)</option>
+            </select>
+          </div>
+
+          <!-- Growth Stage -->
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Current Growth Stage (अवस्था)</label>
+            <select id="cra-stage" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-red-500 focus:outline-none">
+              <option value="Grain / Pod Filling" selected>Grain / Pod Filling (दाना / फली भराव)</option>
+              <option value="Flowering / Squaring">Flowering / Squaring (फूल / कलियां)</option>
+              <option value="Vegetative / Tillering">Vegetative / Tillering (वानस्पतिक वृद्धि)</option>
+              <option value="Harvest Window">Harvest Window / Mature (कटाई अवस्था)</option>
+              <option value="Sowing / Germination">Sowing / Germination (बुवाई / अंकुरण)</option>
+            </select>
+          </div>
+
+          <!-- District -->
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Farm District (जिला)</label>
+            <select id="cra-district" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-red-500 focus:outline-none">
+              <option value="Nashik" data-state="Maharashtra" selected>Nashik (नाशिक, Maharashtra)</option>
+              <option value="Indore" data-state="Madhya Pradesh">Indore (इंदौर, MP)</option>
+              <option value="Ludhiana" data-state="Punjab">Ludhiana (लुधियाना, Punjab)</option>
+              <option value="Karnal" data-state="Haryana">Karnal (करनाल, Haryana)</option>
+              <option value="Kota" data-state="Rajasthan">Kota (कोटा, Rajasthan)</option>
+              <option value="Rajkot" data-state="Gujarat">Rajkot (राजकोट, Gujarat)</option>
+              <option value="Guntur" data-state="Andhra Pradesh">Guntur (गुंटूर, AP)</option>
+              <option value="Kalaburagi" data-state="Karnataka">Kalaburagi (गुलबर्गा, Karnataka)</option>
+              <option value="Bareilly" data-state="Uttar Pradesh">Bareilly (बरेली, UP)</option>
+            </select>
+          </div>
+
+          <!-- Action Button -->
+          <div class="flex items-end">
+            <button onclick="runClimateRiskAssessment()" class="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition shadow">
+              <i data-lucide="shield-alert" class="w-4 h-4"></i>
+              <span>Analyze Climate Threats</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESULTS CONTAINER -->
+      <div id="cra-results-container" class="space-y-6">
+        <!-- Composite Risk Score & Summary Banner -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Vulnerability Score Card -->
+          <div class="bg-gradient-to-br from-amber-50 to-orange-50/70 rounded-2xl p-6 border-2 border-amber-300 shadow-sm flex flex-col justify-between">
+            <div>
+              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block">Climate Vulnerability Index</span>
+              <div class="flex items-baseline gap-2 mt-2">
+                <span id="cra-score" class="text-5xl font-black text-amber-600">68</span>
+                <span class="text-sm font-bold text-slate-500">/ 100</span>
+              </div>
+              <span id="cra-level" class="inline-block mt-2 px-3 py-1 rounded-full text-xs font-extrabold bg-amber-200 text-amber-900">
+                High Risk Level
+              </span>
+            </div>
+            <div class="mt-4 pt-3 border-t border-amber-200">
+              <p id="cra-summary" class="text-xs text-slate-700 leading-relaxed font-medium">
+                Elevated climatic stress detected. Field drainage, moisture buffering, and crop shielding advised.
+              </p>
+              <button onclick="speakText(document.getElementById('cra-summary').innerText)" class="mt-3 w-full py-2 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+                <i data-lucide="volume-2" class="w-4 h-4"></i> Listen to Climate Alert
+              </button>
+            </div>
+          </div>
+
+          <!-- 5-Threat Radar & Progress Bars -->
+          <div class="md:col-span-2 bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between">
+            <h4 class="font-bold text-slate-900 text-sm mb-3 flex items-center gap-2">
+              <i data-lucide="activity" class="w-4 h-4 text-red-600"></i>
+              <span>Multi-Hazard Risk Breakdown for this Growth Stage</span>
+            </h4>
+
+            <div class="space-y-3.5 text-xs">
+              <!-- Unseasonal Rain -->
+              <div>
+                <div class="flex justify-between font-semibold mb-1">
+                  <span class="flex items-center gap-1.5">🌧️ Unseasonal Rain & Inundation Risk</span>
+                  <span id="cra-val-rain" class="font-black text-red-600">82% (Severe)</span>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                  <div id="cra-bar-rain" class="bg-red-500 h-2.5 rounded-full" style="width: 82%"></div>
+                </div>
+              </div>
+
+              <!-- Terminal Heat -->
+              <div>
+                <div class="flex justify-between font-semibold mb-1">
+                  <span class="flex items-center gap-1.5">🌡️ Terminal Heat Stress & Premature Drying</span>
+                  <span id="cra-val-heat" class="font-black text-orange-600">86% (Critical)</span>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                  <div id="cra-bar-heat" class="bg-orange-500 h-2.5 rounded-full" style="width: 86%"></div>
+                </div>
+              </div>
+
+              <!-- Cyclonic Wind -->
+              <div>
+                <div class="flex justify-between font-semibold mb-1">
+                  <span class="flex items-center gap-1.5">🌪️ Cyclonic Wind Shear & Crop Lodging</span>
+                  <span id="cra-val-wind" class="font-black text-amber-600">30% (Low)</span>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                  <div id="cra-bar-wind" class="bg-amber-500 h-2.5 rounded-full" style="width: 30%"></div>
+                </div>
+              </div>
+
+              <!-- Frost -->
+              <div>
+                <div class="flex justify-between font-semibold mb-1">
+                  <span class="flex items-center gap-1.5">❄️ Cold Wave & Frost Hazard</span>
+                  <span id="cra-val-frost" class="font-black text-blue-600">20% (Minimal)</span>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                  <div id="cra-bar-frost" class="bg-blue-400 h-2.5 rounded-full" style="width: 20%"></div>
+                </div>
+              </div>
+
+              <!-- Drought -->
+              <div>
+                <div class="flex justify-between font-semibold mb-1">
+                  <span class="flex items-center gap-1.5">💧 Soil Moisture Deficit / Drought Stress</span>
+                  <span id="cra-val-drought" class="font-black text-emerald-600">35% (Manageable)</span>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                  <div id="cra-bar-drought" class="bg-emerald-500 h-2.5 rounded-full" style="width: 35%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Emergency Disaster Protocol Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Pre-Disaster Actions -->
+          <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+            <h4 class="font-bold text-slate-900 text-sm mb-3 flex items-center gap-2 text-amber-800">
+              <i data-lucide="shield" class="w-4 h-4 text-amber-600"></i>
+              <span>Pre-Disaster Preventive Actions (Before Calamity Hits)</span>
+            </h4>
+            <ul id="cra-pre-actions" class="space-y-2.5 text-xs text-slate-700">
+              <!-- Dynamically populated -->
+            </ul>
+          </div>
+
+          <!-- Post-Disaster Recovery -->
+          <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+            <h4 class="font-bold text-slate-900 text-sm mb-3 flex items-center gap-2 text-emerald-800">
+              <i data-lucide="sparkle" class="w-4 h-4 text-emerald-600"></i>
+              <span>Post-Disaster Field Recovery & Health Restoration (0 - 48 Hours)</span>
+            </h4>
+            <ul id="cra-post-actions" class="space-y-2.5 text-xs text-slate-700">
+              <!-- Dynamically populated -->
+            </ul>
+          </div>
+        </div>
+
+        <!-- PMFBY Insurance Claim Shield -->
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200 shadow-sm">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+            <div>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-blue-700 bg-blue-100 px-2.5 py-0.5 rounded-full">
+                Pradhan Mantri Fasal Bima Yojana (PMFBY) Shield
+              </span>
+              <h4 class="text-lg font-black text-slate-900 mt-1">72-Hour Calamity Intimation & Insurance Roadmap</h4>
+            </div>
+            <div class="bg-red-100 text-red-800 px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 border border-red-200">
+              <i data-lucide="clock" class="w-4 h-4"></i>
+              <span>Strict 72-Hour Claim Deadline</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs mt-3">
+            <div class="bg-white p-3.5 rounded-xl border border-blue-100">
+              <span class="text-blue-700 font-bold block mb-1">📞 Toll-Free Helpline</span>
+              <p class="font-extrabold text-base text-slate-900">1800-180-1551</p>
+              <span class="text-[10px] text-slate-500">Kisan Call Center / PMFBY Disaster Intimation</span>
+            </div>
+
+            <div class="bg-white p-3.5 rounded-xl border border-blue-100">
+              <span class="text-blue-700 font-bold block mb-1">📱 Mobile App & Portal</span>
+              <p class="font-bold text-slate-800">Crop Insurance App</p>
+              <span class="text-[10px] text-blue-600 underline">pmfby.gov.in</span>
+            </div>
+
+            <div class="bg-white p-3.5 rounded-xl border border-blue-100">
+              <span class="text-blue-700 font-bold block mb-1">📄 Mandatory Documents</span>
+              <span class="text-[11px] text-slate-600 block">Aadhaar • 7/12 Khasra • Premium Receipt • Geo-tagged Damaged Photos</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Climate-Resilient Cultivar Alternatives -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+          <h4 class="font-bold text-slate-900 text-sm mb-3 flex items-center gap-2">
+            <i data-lucide="seedling" class="w-4 h-4 text-emerald-600"></i>
+            <span>Recommended Climate-Resilient Cultivars to Guard Future Harvests</span>
+          </h4>
+          <div id="cra-varieties-container" class="flex flex-wrap gap-2 text-xs">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: MANDI LIVE PRICES & MSP TRACKER    -->
+    <!-- ========================================== -->
+    <section id="panel-mandi" class="hidden space-y-6">
+      <!-- Filter Bar -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
+        <div class="flex flex-wrap gap-3 items-center">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Crop (फसल)</label>
+            <select id="mandi-filter-crop" onchange="loadMandiPrices()" class="bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold rounded-xl px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <option value="all">All Commodities (सभी फसलें)</option>
+              <option value="Soyabean" selected>Soyabean (सोयाबीन)</option>
+              <option value="Wheat">Wheat (गेहूं)</option>
+              <option value="Mustard">Mustard (सरसों)</option>
+              <option value="Cotton (Medium)">Cotton / कपास (Medium)</option>
+              <option value="Cotton (Long)">Cotton / कपास (Long)</option>
+              <option value="Paddy (Common)">Paddy (धान / चावल)</option>
+              <option value="Paddy (Grade A)">Paddy (Grade A / Basmati)</option>
+              <option value="Onion">Onion (प्याज)</option>
+              <option value="Tomato">Tomato (टमाटर)</option>
+              <option value="Potato">Potato (आलू)</option>
+              <option value="Chana (Gram)">Chana (चना)</option>
+              <option value="Tur (Arhar)">Tur / Arhar (अरहर)</option>
+              <option value="Maize">Maize (मक्का)</option>
+              <option value="Groundnut">Groundnut (मूंगफली)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">State (राज्य)</label>
+            <select id="mandi-filter-state" onchange="loadMandiPrices()" class="bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold rounded-xl px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <option value="all">All States (सभी राज्य)</option>
+              <option value="Maharashtra">Maharashtra</option>
+              <option value="Madhya Pradesh">Madhya Pradesh</option>
+              <option value="Punjab">Punjab</option>
+              <option value="Haryana">Haryana</option>
+              <option value="Rajasthan">Rajasthan</option>
+              <option value="Gujarat">Gujarat</option>
+              <option value="Karnataka">Karnataka</option>
+              <option value="Andhra Pradesh">Andhra Pradesh</option>
+              <option value="Delhi">Delhi APMC Hub</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <div class="text-right">
+            <span class="text-xs text-slate-400 block">Active Reporting APMCs</span>
+            <span id="mandi-count" class="text-base font-bold text-slate-800">10 Hubs</span>
+          </div>
+          <button onclick="loadMandiPrices()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh Prices
+          </button>
+        </div>
+      </div>
+
+      <!-- Price Trend Chart & Analytics -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+          <div class="flex justify-between items-center mb-4">
+            <div>
+              <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
+                <i data-lucide="line-chart" class="w-5 h-5 text-emerald-600"></i>
+                <span id="chart-crop-title">Soyabean: 30-Day APMC History & 14-Day AI Forecast</span>
+              </h3>
+              <p class="text-xs text-slate-500">Historical modal price vs projected price curve (₹ per Quintal)</p>
+            </div>
+            <span id="msp-benchmark-tag" class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+              MSP: ₹4,892/Qtl
+            </span>
+          </div>
+
+          <div class="h-64">
+            <canvas id="trendChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Market Sentiment & Action Card -->
+        <div class="bg-gradient-to-br from-amber-50 to-orange-50/60 rounded-2xl p-6 border border-amber-200 shadow-sm flex flex-col justify-between">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-amber-700 flex items-center gap-1">
+              <i data-lucide="zap" class="w-4 h-4"></i> AI Demand Forecast & Strategy
+            </span>
+            <h4 id="market-sentiment-title" class="text-xl font-extrabold text-slate-900 mt-2">Bullish Trend Ahead</h4>
+            <p id="market-advisory-action" class="text-xs text-slate-700 mt-2 leading-relaxed">
+              Wholesale arrivals have stabilized. High crushing unit demand is pushing prices above official MSP. Recommended: Stagger market dispatch over next 10-15 days to capture projected ₹120-₹200/quintal upside.
+            </p>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-amber-200/60">
+            <div class="flex items-center justify-between text-xs font-semibold text-slate-600">
+              <span>MSP Security Guarantee</span>
+              <span class="text-emerald-700 font-bold">100% Floor Shield</span>
+            </div>
+            <button onclick="switchTab('arbitrage')" class="mt-3 w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition shadow">
+              <span>Find Best Mandi for Max Net Profit</span>
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mandi Cards Table / Grid -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50/60">
+          <h3 class="font-bold text-slate-800 text-sm">Real-Time Mandi Rates & MSP Benchmark Analysis</h3>
+          <span class="text-xs text-slate-500">Sorted by highest modal price</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-100/75 text-[11px] font-bold text-slate-600 uppercase tracking-wider border-b border-slate-200">
+                <th class="py-3 px-4">Mandi (मार्केट)</th>
+                <th class="py-3 px-4">Commodity (फसल)</th>
+                <th class="py-3 px-4">Modal Price (औसत भाव)</th>
+                <th class="py-3 px-4">Range (Min - Max)</th>
+                <th class="py-3 px-4">Vs MSP (न्यूनतम समर्थन मूल्य)</th>
+                <th class="py-3 px-4">Arrivals</th>
+                <th class="py-3 px-4">Demand</th>
+                <th class="py-3 px-4 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="mandi-table-body" class="divide-y divide-slate-100 text-xs">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB: MARKET INTELLIGENCE SUITE             -->
+    <!-- ========================================== -->
+    <section id="panel-market-intel-tool" class="hidden space-y-6">
+      <!-- Hero Banner -->
+      <div class="bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 text-white rounded-2xl p-6 shadow-md relative overflow-hidden">
+        <div class="max-w-3xl">
+          <span class="bg-emerald-500/20 text-emerald-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider border border-emerald-400/30">
+            ⭐ Flagship Capability: Market Intelligence
+          </span>
+          <h2 class="text-2xl font-extrabold mt-2">AgriMitra Market Intelligence Suite</h2>
+          <p class="text-emerald-100 text-xs sm:text-sm mt-1 leading-relaxed">
+            Stop selling in distress. Our AI pricing and demand suite monitors wholesale mill pipelines, predicts 30-day price trajectories, computes warehouse storage profitability, and routes your produce to the highest-paying buyers.
+          </p>
+        </div>
+      </div>
+
+      <!-- Controls & Input Card -->
+      <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+        <h3 class="font-bold text-slate-900 text-base mb-4 flex items-center gap-2">
+          <i data-lucide="sliders" class="w-5 h-5 text-emerald-600"></i>
+          <span>Select Commodity & Quantity for Market Intelligence</span>
+        </h3>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Crop -->
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Target Commodity (फसल)</label>
+            <select id="mi-crop" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <option value="Soyabean" selected>Soyabean (सोयाबीन)</option>
+              <option value="Wheat">Wheat (गेहूं)</option>
+              <option value="Mustard">Mustard (सरसों)</option>
+              <option value="Cotton (Medium)">Cotton (कपास)</option>
+              <option value="Onion">Onion (प्याज)</option>
+              <option value="Tomato">Tomato (टमाटर)</option>
+              <option value="Chana (Gram)">Chana (चना)</option>
+              <option value="Paddy (Common)">Paddy (धान)</option>
+            </select>
+          </div>
+
+          <!-- Volume -->
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Produce Volume (Quintals)</label>
+            <input type="number" id="mi-quantity" value="80" min="5" max="2000" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            <span class="text-[10px] text-slate-400">80 Quintals = ~8 Metric Tonnes</span>
+          </div>
+
+          <!-- Origin Hub -->
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Your Farm District (जिला)</label>
+            <select id="mi-district" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <option value="Nashik" data-state="Maharashtra" selected>Nashik (नाशिक, Maharashtra)</option>
+              <option value="Indore" data-state="Madhya Pradesh">Indore (इंदौर, MP)</option>
+              <option value="Ludhiana" data-state="Punjab">Ludhiana (लुधियाना, Punjab)</option>
+              <option value="Kota" data-state="Rajasthan">Kota (कोटा, Rajasthan)</option>
+              <option value="Rajkot" data-state="Gujarat">Rajkot (राजकोट, Gujarat)</option>
+              <option value="Karnal" data-state="Haryana">Karnal (करनाल, Haryana)</option>
+              <option value="Guntur" data-state="Andhra Pradesh">Guntur (गुंटूर, AP)</option>
+              <option value="Kalaburagi" data-state="Karnataka">Kalaburagi (गुलबर्गा, Karnataka)</option>
+            </select>
+          </div>
+
+          <!-- Run Button -->
+          <div class="flex items-end">
+            <button onclick="runMarketIntelligence()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition shadow">
+              <i data-lucide="zap" class="w-4 h-4"></i>
+              <span>Generate Market Intel</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESULTS CONTAINER -->
+      <div id="mi-results-view" class="space-y-6">
+        <!-- Top Row: When to Sell Signal + Storage Economics -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- AI Action Timing Signal Card -->
+          <div class="lg:col-span-2 bg-gradient-to-br from-emerald-50 via-teal-50 to-emerald-100 rounded-2xl p-6 border-2 border-emerald-500 shadow-sm flex flex-col justify-between relative">
+            <div>
+              <div class="flex justify-between items-start">
+                <div>
+                  <span class="text-xs font-bold text-emerald-800 uppercase tracking-wider block">AI Marketing Signal ("When to Sell")</span>
+                  <div class="flex items-center gap-2 mt-2">
+                    <span id="mi-action-badge" class="px-4 py-1.5 rounded-full text-sm font-black bg-emerald-600 text-white shadow">
+                      🟢 HOLD / STORE (Wait 20-30 Days)
+                    </span>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <span class="text-xs text-slate-500 block">Current Benchmark</span>
+                  <span id="mi-current-price" class="text-2xl font-black text-slate-900">₹4,980/Qtl</span>
+                  <span id="mi-msp-status" class="text-[10px] font-bold text-emerald-700 block">Above MSP (₹4,892)</span>
+                </div>
+              </div>
+
+              <!-- Projected Trajectory -->
+              <div class="grid grid-cols-2 gap-3 mt-4 pt-3 border-t border-emerald-200">
+                <div class="bg-white/80 p-3 rounded-xl border border-emerald-100">
+                  <span class="text-[11px] text-slate-500 block">15-Day Projected Target</span>
+                  <span id="mi-price-15d" class="text-lg font-black text-emerald-800">₹5,204/Qtl</span>
+                  <span class="text-[10px] text-emerald-600 font-bold block">+4.5% Expected Upside</span>
+                </div>
+                <div class="bg-white/80 p-3 rounded-xl border border-emerald-100">
+                  <span class="text-[11px] text-slate-500 block">30-Day Forward Target</span>
+                  <span id="mi-price-30d" class="text-lg font-black text-emerald-800">₹5,438/Qtl</span>
+                  <span class="text-[10px] text-emerald-600 font-bold block">+9.2% Projected Peak</span>
+                </div>
+              </div>
+
+              <!-- Catalyst Reasoning -->
+              <div class="mt-4 p-3 bg-white/70 rounded-xl border border-emerald-200 text-xs text-slate-700">
+                <strong class="text-emerald-950 block mb-0.5">💡 Market Catalyst:</strong>
+                <p id="mi-reasoning">
+                  Processing mills are operating at high capacity while farm arrivals are tapering off. Storing in certified WDRA warehouses will capture an estimated ₹350 - ₹480/Qtl upside.
+                </p>
+              </div>
+            </div>
+
+            <button onclick="speakText(document.getElementById('mi-reasoning').innerText)" class="mt-4 w-full py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-900 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+              <i data-lucide="volume-2" class="w-4 h-4"></i> Listen to Marketing Intelligence Rationale
+            </button>
+          </div>
+
+          <!-- Warehouse Storage Economics Calculator Card -->
+          <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between">
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Storage Profitability (30 Days)</span>
+                <span id="mi-storage-viable-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">
+                  Highly Profitable
+                </span>
+              </div>
+
+              <div class="space-y-2.5 text-xs mt-3">
+                <div class="flex justify-between py-1 border-b border-slate-100">
+                  <span class="text-slate-600">Expected Gross Gain:</span>
+                  <span id="mi-storage-gross-gain" class="font-bold text-emerald-700">+₹458 / Qtl</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-100">
+                  <span class="text-slate-600">Warehouse Rent (30d):</span>
+                  <span class="font-bold text-slate-700">-₹18 / Qtl</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-100">
+                  <span class="text-slate-600">Working Capital Interest:</span>
+                  <span id="mi-storage-interest" class="font-bold text-slate-700">-₹50 / Qtl</span>
+                </div>
+                <div class="flex justify-between py-1">
+                  <span class="text-slate-600 font-bold">Net Profit per Quintal:</span>
+                  <span id="mi-storage-net-qtl" class="font-black text-emerald-700">+₹390 / Qtl</span>
+                </div>
+              </div>
+
+              <div class="mt-4 p-3 bg-emerald-50 rounded-xl border border-emerald-100 text-center">
+                <span class="text-[11px] text-slate-500 block">Total Net Extra In-Hand Profit:</span>
+                <span id="mi-storage-total-gain" class="text-2xl font-black text-emerald-700">+₹31,200</span>
+                <span class="text-[10px] text-slate-400 block mt-0.5">After covering all warehouse & financing costs</span>
+              </div>
+            </div>
+
+            <p class="text-[10px] text-slate-400 mt-3 text-center">
+              *Eligible for e-NWR pledge financing at 7% subsidized interest under AIF.
+            </p>
+          </div>
+        </div>
+
+        <!-- Middle Row: Buyer Procurement Clusters & FAQ Standards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Institutional Buyer Clusters -->
+          <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+            <h4 class="font-bold text-slate-900 text-sm mb-3 flex items-center gap-2">
+              <i data-lucide="building-2" class="w-4 h-4 text-emerald-600"></i>
+              <span>Active Buyer Demand Clusters & Industrial Pipelines</span>
+            </h4>
+            <div class="space-y-3 text-xs">
+              <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <span class="text-[10px] font-bold uppercase text-slate-400 block">Target Processing Hubs</span>
+                <p id="mi-buyer-cluster" class="font-bold text-slate-800 mt-0.5">Solvent Extraction Plants & Feed Mills (Indore, Nagpur)</p>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                  <span class="text-[10px] font-bold uppercase text-slate-400 block">Buyer Intensity</span>
+                  <span id="mi-demand-intensity" class="font-extrabold text-red-600">Very High</span>
+                </div>
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                  <span class="text-[10px] font-bold uppercase text-slate-400 block">Wholesale Arrival Trend</span>
+                  <span id="mi-arrival-trend" class="font-bold text-slate-700">Declining (-14%)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- FAQ Standards -->
+          <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+            <h4 class="font-bold text-slate-900 text-sm mb-3 flex items-center gap-2">
+              <i data-lucide="award" class="w-4 h-4 text-amber-600"></i>
+              <span>Fair Average Quality (FAQ) Specs for Zero Deduction</span>
+            </h4>
+            <div id="mi-faq-container" class="space-y-2 text-xs">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom: Inter-Mandi Arbitrage Router Table -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="px-6 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+            <div>
+              <h4 class="font-bold text-slate-900 text-sm">Real-Time Inter-Mandi Arbitrage Router</h4>
+              <p class="text-[11px] text-slate-500">Calculates net in-hand payout after deducting road freight and APMC cess</p>
+            </div>
+            <span class="text-xs font-bold text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-full">
+              Automated Route Optimization
+            </span>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-slate-100 text-[11px] font-bold text-slate-600 uppercase border-b border-slate-200">
+                  <th class="py-3 px-4">Rank</th>
+                  <th class="py-3 px-4">Destination APMC Mandi</th>
+                  <th class="py-3 px-4">Distance</th>
+                  <th class="py-3 px-4">Market Rate</th>
+                  <th class="py-3 px-4">Freight Charge</th>
+                  <th class="py-3 px-4">APMC Cess</th>
+                  <th class="py-3 px-4">Net In-Hand Profit</th>
+                  <th class="py-3 px-4">Net Realized/Qtl</th>
+                </tr>
+              </thead>
+              <tbody id="mi-arbitrage-tbody" class="divide-y divide-slate-100">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: WHERE TO SELL (PROFIT ARBITRAGE)    -->
+    <!-- ========================================== -->
+    <section id="panel-arbitrage" class="hidden space-y-6">
+      <!-- Arbitrage Calculator Header -->
+      <div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white rounded-2xl p-6 shadow-md relative overflow-hidden">
+        <div class="max-w-3xl">
+          <span class="bg-blue-500/20 text-blue-200 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider border border-blue-400/30">
+            Logistics & Price Arbitrage Engine
+          </span>
+          <h2 class="text-2xl font-extrabold mt-2">Don't settle for the nearest low-paying mandi.</h2>
+          <p class="text-blue-200 text-xs sm:text-sm mt-1 leading-relaxed">
+            AgriMitra AI calculates the precise freight and transportation cost from your farm to high-demand regional terminal markets. Discover where you earn the highest net profit in hand.
+          </p>
+        </div>
+      </div>
+
+      <!-- Calculator Inputs -->
+      <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+        <h3 class="font-bold text-slate-900 text-base mb-4 flex items-center gap-2">
+          <i data-lucide="calculator" class="w-5 h-5 text-blue-600"></i>
+          <span>Net Profit & Mandi Finder Calculator</span>
+        </h3>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Your Farm District / Hub</label>
+            <select id="arb-farmer-origin" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              <option value="Nashik" data-lat="19.9975" data-lon="73.7898">Nashik, Maharashtra</option>
+              <option value="Pune" data-lat="18.5204" data-lon="73.8567">Pune, Maharashtra</option>
+              <option value="Indore" data-lat="22.7196" data-lon="75.8577">Indore, Madhya Pradesh</option>
+              <option value="Kota" data-lat="25.2138" data-lon="75.8648">Kota, Rajasthan</option>
+              <option value="Ludhiana" data-lat="30.9010" data-lon="75.8573">Ludhiana, Punjab</option>
+              <option value="Karnal" data-lat="29.6857" data-lon="76.9905">Karnal, Haryana</option>
+              <option value="Rajkot" data-lat="22.3039" data-lon="70.8022">Rajkot, Gujarat</option>
+              <option value="Guntur" data-lat="16.3067" data-lon="80.4365">Guntur, Andhra Pradesh</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Crop to Sell</label>
+            <select id="arb-crop" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              <option value="Onion">Onion (प्याज)</option>
+              <option value="Soyabean">Soyabean (सोयाबीन)</option>
+              <option value="Wheat">Wheat (गेहूं)</option>
+              <option value="Tomato">Tomato (टमाटर)</option>
+              <option value="Mustard">Mustard (सरसों)</option>
+              <option value="Chana (Gram)">Chana (चना)</option>
+              <option value="Cotton (Medium)">Cotton (कपास)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Produce Volume (Quintals)</label>
+            <input type="number" id="arb-quantity" value="60" min="5" max="1000" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <span class="text-[10px] text-slate-400">60 Quintals = ~6 Metric Tonnes (1 Tractor Trolley)</span>
+          </div>
+
+          <div class="flex items-end">
+            <button onclick="calculateArbitrage()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition shadow">
+              <i data-lucide="search" class="w-4 h-4"></i> Calculate Highest Net Profit
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comparison Results Banner -->
+      <div id="arbitrage-result-banner" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Best Mandi Card -->
+        <div class="md:col-span-2 bg-gradient-to-br from-emerald-50 via-green-50 to-emerald-100 rounded-2xl p-6 border-2 border-emerald-500 shadow-sm relative">
+          <span class="absolute top-4 right-4 bg-emerald-600 text-white text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow">
+            ⭐ Recommended Top Payout
+          </span>
+          <span class="text-xs font-bold text-emerald-800 uppercase tracking-wider block">Best Destination Mandi</span>
+          <h3 id="arb-best-name" class="text-2xl font-black text-slate-900 mt-1">Azadpur APMC (Delhi)</h3>
+          <p id="arb-best-sub" class="text-xs text-slate-600 mt-0.5">Distance: 450 km • Modal Rate: ₹2,850/Qtl</p>
+
+          <div class="grid grid-cols-3 gap-3 mt-6 pt-4 border-t border-emerald-200">
+            <div>
+              <span class="text-xs text-slate-500 block">Gross Sale Revenue</span>
+              <span id="arb-best-gross" class="text-base font-bold text-slate-800">₹1,71,000</span>
+            </div>
+            <div>
+              <span class="text-xs text-slate-500 block">Estimated Transport</span>
+              <span id="arb-best-transport" class="text-base font-bold text-red-600">-₹12,150</span>
+            </div>
+            <div>
+              <span class="text-xs text-emerald-800 font-bold block">Net In-Hand Profit</span>
+              <span id="arb-best-net" class="text-xl font-extrabold text-emerald-700">₹1,58,850</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Arbitrage Advantage Summary -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Extra Earnings Opportunity</span>
+            <div class="mt-3">
+              <span class="text-xs text-slate-500 block">Additional Profit over Local Mandi:</span>
+              <span id="arb-gain-amount" class="text-3xl font-black text-blue-600">+₹14,200</span>
+            </div>
+            <p id="arb-gain-desc" class="text-xs text-slate-600 mt-2 leading-relaxed">
+              Even after paying ₹12,150 in freight logistics, selling in this high-demand market gives your family ₹14,200 more net cash than liquidating locally.
+            </p>
+          </div>
+          <button onclick="speakText(document.getElementById('arb-gain-desc').innerText)" class="mt-4 w-full py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+            <i data-lucide="volume-2" class="w-4 h-4"></i> Listen to Calculation
+          </button>
+        </div>
+      </div>
+
+      <!-- Ranked Mandis Table -->
+      <div id="arb-table-card" class="hidden bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-200 bg-slate-50">
+          <h3 class="font-bold text-slate-800 text-sm">All Evaluated Mandis (Ranked by Net In-Hand Profit)</h3>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-100 text-[11px] font-bold text-slate-600 uppercase border-b border-slate-200">
+                <th class="py-3 px-4">Rank</th>
+                <th class="py-3 px-4">Mandi & State</th>
+                <th class="py-3 px-4">Distance</th>
+                <th class="py-3 px-4">Market Rate</th>
+                <th class="py-3 px-4">Gross Revenue</th>
+                <th class="py-3 px-4">Freight Cost</th>
+                <th class="py-3 px-4">Net Profit</th>
+                <th class="py-3 px-4">Net Rate/Qtl</th>
+              </tr>
+            </thead>
+            <tbody id="arb-table-body" class="divide-y divide-slate-100">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 4: WHAT TO GROW (DECISION MATRIX)      -->
+    <!-- ========================================== -->
+    <section id="panel-crop-engine" class="hidden space-y-6">
+      <div class="bg-gradient-to-r from-purple-900 via-indigo-950 to-slate-900 text-white rounded-2xl p-6 shadow-md">
+        <div class="max-w-3xl">
+          <span class="bg-purple-500/20 text-purple-200 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider border border-purple-400/30">
+            AgriMitra Crop Diversification & Planning Engine
+          </span>
+          <h2 class="text-2xl font-extrabold mt-2">Break free from vulnerable monocultures.</h2>
+          <p class="text-purple-200 text-xs sm:text-sm mt-1 leading-relaxed">
+            Many farmers suffer losses from repetitive planting of water-stressed crops. Enter your farm conditions below to discover resilient, climate-smart, and high-demand alternative crops.
+          </p>
+        </div>
+      </div>
+
+      <!-- Decision Filters -->
+      <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+        <h3 class="font-bold text-slate-900 text-base mb-4 flex items-center gap-2">
+          <i data-lucide="sliders" class="w-5 h-5 text-purple-600"></i>
+          <span>Configure Your Farm Parameters</span>
+        </h3>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Cropping Season</label>
+            <select id="crop-season" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-purple-500 focus:outline-none">
+              <option value="Kharif" selected>Kharif (Monsoon / जून-अक्टूबर)</option>
+              <option value="Rabi">Rabi (Winter / अक्टूबर-मार्च)</option>
+              <option value="Zaid">Zaid (Summer / मार्च-जून)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Soil Type</label>
+            <select id="crop-soil" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-purple-500 focus:outline-none">
+              <option value="Black Soil" selected>Black Soil (काली मिट्टी)</option>
+              <option value="Alluvial Soil">Alluvial Soil (जलोढ़ मिट्टी)</option>
+              <option value="Red Soil">Red Soil (लाल मिट्टी)</option>
+              <option value="Sandy Loam">Sandy Loam (बलुई दोमट)</option>
+              <option value="Clay Loam">Clay Loam (चिकनी दोमट)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Water Availability</label>
+            <select id="crop-water" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-purple-500 focus:outline-none">
+              <option value="Low">Low (Rainfed / Unirrigated)</option>
+              <option value="Medium" selected>Medium (Borewell / Tube-well)</option>
+              <option value="High">High (Canal / Perennial Supply)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Land Size (Acres)</label>
+            <input type="number" id="crop-land" value="3.0" step="0.5" min="0.5" max="50" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-purple-500 focus:outline-none">
+          </div>
+
+          <div class="flex items-end">
+            <button onclick="evaluateCrops()" class="w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition shadow">
+              <i data-lucide="sparkles" class="w-4 h-4"></i> Run Recommendation
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recommendation Cards Grid -->
+      <div id="crop-recommendations-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Dynamically populated with crop cards -->
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB: DEDICATED AI CROP ADVISOR             -->
+    <!-- ========================================== -->
+    <section id="panel-ai-advisor-tool" class="hidden space-y-6">
+      <!-- Hero Banner -->
+      <div class="bg-gradient-to-r from-emerald-900 via-teal-950 to-slate-900 text-white rounded-2xl p-6 shadow-md relative overflow-hidden">
+        <div class="max-w-3xl">
+          <span class="bg-emerald-500/20 text-emerald-200 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider border border-emerald-400/30">
+            Precision Agronomy & Fertilizer Prescription Engine
+          </span>
+          <h2 class="text-2xl font-extrabold mt-2">AgriMitra AI Crop & Nutrition Advisor</h2>
+          <p class="text-emerald-200 text-xs sm:text-sm mt-1 leading-relaxed">
+            Synthesizes your Soil Test (N-P-K & pH), crop rotation history, and irrigation capacity to generate a field-ready crop plan, 4-stage fertilizer dosage schedule, and pest prevention shield.
+          </p>
+        </div>
+      </div>
+
+      <!-- Soil & Farm Input Configuration Card -->
+      <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+        <h3 class="font-bold text-slate-900 text-base mb-4 flex items-center gap-2">
+          <i data-lucide="test-tube-2" class="w-5 h-5 text-emerald-600"></i>
+          <span>Soil Test Parameters & Cropping Inputs</span>
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Season -->
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Cropping Season</label>
+            <select id="adv-season" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <option value="Kharif" selected>Kharif (Monsoon / खरीफ)</option>
+              <option value="Rabi">Rabi (Winter / रबी)</option>
+              <option value="Zaid">Zaid (Summer / जायद)</option>
+            </select>
+          </div>
+
+          <!-- Soil Type -->
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Soil Type</label>
+            <select id="adv-soil" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <option value="Black Soil" selected>Black Soil (काली मिट्टी)</option>
+              <option value="Alluvial Soil">Alluvial Soil (जलोढ़ मिट्टी)</option>
+              <option value="Red Soil">Red Soil (लाल मिट्टी)</option>
+              <option value="Sandy Loam">Sandy Loam (बलुई दोमट)</option>
+              <option value="Clay Loam">Clay Loam (चिकनी दोमट)</option>
+            </select>
+          </div>
+
+          <!-- Irrigation -->
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Irrigation Source</label>
+            <select id="adv-irrigation" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <option value="Borewell" selected>Borewell / Tube-well (मध्यम)</option>
+              <option value="Canal">Canal / Perennial (उच्च सिंचाई)</option>
+              <option value="Drip">Drip / Micro-Irrigation (टपक)</option>
+              <option value="Rainfed">Rainfed / Unirrigated (वर्षा आधारित)</option>
+            </select>
+          </div>
+
+          <!-- Previous Crop -->
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Previous Crop Grown</label>
+            <select id="adv-prev-crop" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <option value="None">None / Fallow (परती)</option>
+              <option value="Soyabean" selected>Soyabean (सोयाबीन - दलहन)</option>
+              <option value="Paddy (Rice)">Paddy / Rice (धान)</option>
+              <option value="Wheat">Wheat (गेहूं)</option>
+              <option value="Cotton">Cotton (कपास)</option>
+              <option value="Sugarcane">Sugarcane (गन्ना)</option>
+              <option value="Chana (Gram)">Chana (चना / दलहन)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Soil Health Sliders (N, P, K, pH) -->
+        <div class="mt-6 pt-5 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <!-- Nitrogen -->
+          <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-100">
+            <div class="flex justify-between items-center mb-1.5">
+              <span class="text-xs font-bold text-slate-700">Nitrogen (N)</span>
+              <span id="badge-n-val" class="text-xs font-black text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">120 kg/ha</span>
+            </div>
+            <input type="range" id="adv-n" min="40" max="350" value="120" oninput="document.getElementById('badge-n-val').innerText = this.value + ' kg/ha'" class="w-full accent-emerald-600 cursor-pointer">
+            <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+              <span>Low (&lt;140)</span>
+              <span>Medium</span>
+              <span>High (&gt;280)</span>
+            </div>
+          </div>
+
+          <!-- Phosphorus -->
+          <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-100">
+            <div class="flex justify-between items-center mb-1.5">
+              <span class="text-xs font-bold text-slate-700">Phosphorus (P)</span>
+              <span id="badge-p-val" class="text-xs font-black text-blue-700 bg-blue-100 px-2 py-0.5 rounded">45 kg/ha</span>
+            </div>
+            <input type="range" id="adv-p" min="10" max="90" value="45" oninput="document.getElementById('badge-p-val').innerText = this.value + ' kg/ha'" class="w-full accent-blue-600 cursor-pointer">
+            <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+              <span>Low (&lt;25)</span>
+              <span>Medium</span>
+              <span>High (&gt;55)</span>
+            </div>
+          </div>
+
+          <!-- Potassium -->
+          <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-100">
+            <div class="flex justify-between items-center mb-1.5">
+              <span class="text-xs font-bold text-slate-700">Potassium (K)</span>
+              <span id="badge-k-val" class="text-xs font-black text-amber-700 bg-amber-100 px-2 py-0.5 rounded">140 kg/ha</span>
+            </div>
+            <input type="range" id="adv-k" min="60" max="350" value="140" oninput="document.getElementById('badge-k-val').innerText = this.value + ' kg/ha'" class="w-full accent-amber-600 cursor-pointer">
+            <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+              <span>Low (&lt;120)</span>
+              <span>Medium</span>
+              <span>High (&gt;250)</span>
+            </div>
+          </div>
+
+          <!-- Soil pH -->
+          <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-100">
+            <div class="flex justify-between items-center mb-1.5">
+              <span class="text-xs font-bold text-slate-700">Soil pH Level</span>
+              <span id="badge-ph-val" class="text-xs font-black text-purple-700 bg-purple-100 px-2 py-0.5 rounded">6.8 (Neutral)</span>
+            </div>
+            <input type="range" id="adv-ph" min="5.0" max="8.8" step="0.1" value="6.8" oninput="document.getElementById('badge-ph-val').innerText = this.value + (this.value < 6.0 ? ' (Acidic)' : (this.value > 8.0 ? ' (Alkaline)' : ' (Neutral)'))" class="w-full accent-purple-600 cursor-pointer">
+            <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+              <span>Acidic (&lt;6.0)</span>
+              <span>Neutral (6.5-7.5)</span>
+              <span>Alkaline (&gt;8.0)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="mt-6 pt-4 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-3">
+          <div class="flex items-center gap-3 w-full sm:w-auto">
+            <label class="text-xs font-bold text-slate-600 whitespace-nowrap">Land Acreage:</label>
+            <input type="number" id="adv-land" value="2.5" step="0.5" min="0.5" max="50" class="w-24 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 focus:outline-none">
+            <span class="text-xs text-slate-500">Acres</span>
+          </div>
+
+          <button onclick="runFullCropAdvisor()" class="w-full sm:w-auto px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition shadow">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+            <span>Generate AI Crop & Fertilizer Advisory</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ADVISORY RESULTS CONTAINER -->
+      <div id="advisor-results-view" class="hidden space-y-6">
+        <!-- Diagnostic Summary Header Card -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Soil Health Status -->
+          <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between">
+            <div>
+              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block">Soil Health Diagnostic</span>
+              <div class="mt-3 space-y-2 text-xs">
+                <div class="flex justify-between py-1 border-b border-slate-100">
+                  <span class="text-slate-600">Nitrogen Status:</span>
+                  <span id="diag-n" class="font-bold text-slate-800">Medium</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-100">
+                  <span class="text-slate-600">Phosphorus Status:</span>
+                  <span id="diag-p" class="font-bold text-slate-800">Medium</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-100">
+                  <span class="text-slate-600">Potassium Status:</span>
+                  <span id="diag-k" class="font-bold text-slate-800">Medium</span>
+                </div>
+                <div class="flex justify-between py-1">
+                  <span class="text-slate-600">pH Index:</span>
+                  <span id="diag-ph" class="font-bold text-emerald-700">Optimal Neutral</span>
+                </div>
+              </div>
+            </div>
+            <div id="diag-remedy" class="mt-4 p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-[11px] text-slate-600">
+              Soil pH is in the optimal range.
+            </div>
+          </div>
+
+          <!-- Primary Crop Recommendation -->
+          <div class="md:col-span-2 bg-gradient-to-br from-emerald-50 via-teal-50 to-emerald-100 rounded-2xl p-6 border-2 border-emerald-500 shadow-sm relative">
+            <span class="absolute top-4 right-4 bg-emerald-600 text-white text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow">
+              ⭐ Top Match
+            </span>
+            <span class="text-xs font-bold text-emerald-800 uppercase tracking-wider block">Primary Recommended Crop</span>
+            <div class="flex items-baseline gap-2 mt-1">
+              <h3 id="adv-res-crop-name" class="text-3xl font-black text-slate-900">Soyabean</h3>
+              <span id="adv-res-crop-hi" class="text-lg font-bold text-slate-600">(सोयाबीन)</span>
+            </div>
+            
+            <p id="adv-res-intercrop" class="text-xs font-semibold text-emerald-900 mt-2 bg-white/70 backdrop-blur-sm p-2.5 rounded-xl border border-emerald-200">
+              🌱 Recommended Intercrop: Maize (2:1 ratio) to cushion monsoon risk.
+            </p>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-3 border-t border-emerald-200/80 text-xs">
+              <div>
+                <span class="text-slate-500 block text-[10px]">Suitability Score</span>
+                <span id="adv-res-score" class="text-base font-extrabold text-emerald-700">92%</span>
+              </div>
+              <div>
+                <span class="text-slate-500 block text-[10px]">Projected Yield</span>
+                <span id="adv-res-yield" class="text-base font-extrabold text-slate-800">25 Qtl</span>
+              </div>
+              <div>
+                <span class="text-slate-500 block text-[10px]">Est. Input Cost</span>
+                <span id="adv-res-cost" class="text-base font-extrabold text-slate-700">₹35,000</span>
+              </div>
+              <div>
+                <span class="text-emerald-800 font-bold block text-[10px]">Est. Net Profit</span>
+                <span id="adv-res-net" class="text-lg font-black text-emerald-800">₹90,000</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4-Stage Fertilizer Prescription Schedule -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="px-6 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+            <div>
+              <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                <i data-lucide="leaf" class="w-4 h-4 text-emerald-600"></i>
+                <span>Custom 4-Stage Fertilizer & Nutrient Application Schedule</span>
+              </h3>
+              <p class="text-[11px] text-slate-500">Calculated specifically for your soil test & land area</p>
+            </div>
+            <button onclick="window.print()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold flex items-center gap-1 transition">
+              <i data-lucide="printer" class="w-3.5 h-3.5"></i> Print Plan
+            </button>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-slate-100 text-[11px] font-bold text-slate-600 uppercase border-b border-slate-200">
+                  <th class="py-3 px-4">Stage</th>
+                  <th class="py-3 px-4">Ideal Timing</th>
+                  <th class="py-3 px-4">Prescribed Fertilizer & Nutrients</th>
+                </tr>
+              </thead>
+              <tbody id="adv-fertilizer-tbody" class="divide-y divide-slate-100">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Integrated Pest Management Shield -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+          <h3 class="font-bold text-slate-900 text-base mb-3 flex items-center gap-2">
+            <i data-lucide="shield-check" class="w-5 h-5 text-emerald-600"></i>
+            <span>Integrated Pest & Disease Shield (IPM)</span>
+          </h3>
+          <div id="adv-pest-container" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 5: AGRIMITRA AI ASSISTANT (CHAT)       -->
+    <!-- ========================================== -->
+    <section id="panel-advisor" class="hidden space-y-6">
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[650px]">
+        <!-- Chat Header -->
+        <div class="px-6 py-4 bg-gradient-to-r from-emerald-800 via-teal-900 to-brand-800 text-white flex justify-between items-center">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-full bg-emerald-600 flex items-center justify-center font-bold text-white shadow">
+              <i data-lucide="bot" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <h3 class="font-extrabold text-sm sm:text-base">AgriMitra AI Agronomist & Market Companion</h3>
+              <p id="chat-subtitle" class="text-xs text-emerald-200">5 Languages Supported (English, తెలుగు, हिन्दी, தமிழ், ಕನ್ನಡ) • Real-time Climate & Mandi Advisory</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button onclick="clearChat()" class="px-3 py-1 bg-emerald-900/60 hover:bg-emerald-900 rounded-lg text-xs font-semibold transition">Clear</button>
+          </div>
+        </div>
+
+        <!-- Chat Messages Scroll Area -->
+        <div id="chat-messages" class="flex-1 p-6 overflow-y-auto space-y-4 bg-slate-50/50">
+          <!-- Initial Welcome Message -->
+          <div class="flex items-start space-x-3 max-w-2xl">
+            <div class="w-8 h-8 rounded-full bg-brand-700 text-white flex items-center justify-center flex-shrink-0 text-xs font-bold">
+              AM
+            </div>
+            <div class="bg-white p-4 rounded-2xl rounded-tl-none border border-slate-200 shadow-sm text-xs leading-relaxed text-slate-800">
+              <p id="chat-welcome-title" class="font-semibold text-slate-900 mb-1">Namaste! I am your AgriMitra AI Agricultural Decision Advisor.</p>
+              <p id="chat-welcome-subtitle">I provide specialized agronomic and market intelligence powered by Amazon Bedrock:</p>
+              <ul class="list-disc list-inside mt-1.5 space-y-1 text-slate-600" id="chat-welcome-list">
+                <li><strong>Climate Risks:</strong> Protecting crops from unseasonal rains and heat stress.</li>
+                <li><strong>Crop Choice:</strong> Identifying resilient, profitable crops for your specific soil and water.</li>
+                <li><strong>Mandi Selling Strategy:</strong> Finding where demand exists to maximize net profit.</li>
+                <li><strong>Inputs & Subsidies:</strong> Fertilizer balancing, PM-KISAN, and PMFBY claims.</li>
+              </ul>
+              <p id="chat-welcome-footer" class="mt-2 text-slate-500 text-[11px]">Click any prompt below or type/speak in English, తెలుగు, हिन्दी, தமிழ், or ಕನ್ನಡ.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Prompt Chips -->
+        <div class="px-6 py-2.5 bg-white border-t border-slate-100 flex items-center gap-2 overflow-x-auto scrollbar-none text-xs">
+          <span class="text-slate-400 font-bold text-[11px] whitespace-nowrap">Suggested:</span>
+          <button id="prompt-cyclone" onclick="sendQuickPrompt('How should I protect my crops from unseasonal heavy rainfall?')" class="px-3 py-1 rounded-full bg-slate-100 hover:bg-emerald-100 hover:text-emerald-800 text-slate-700 font-medium whitespace-nowrap transition border border-slate-200">
+            🌧️ Unseasonal Rain Protection
+          </button>
+          <button id="prompt-alt-crop" onclick="sendQuickPrompt('What is the best alternative crop to wheat if water is low?')" class="px-3 py-1 rounded-full bg-slate-100 hover:bg-emerald-100 hover:text-emerald-800 text-slate-700 font-medium whitespace-nowrap transition border border-slate-200">
+            🌱 Low-Water Alternative Crops
+          </button>
+          <button id="prompt-mandi" onclick="sendQuickPrompt('Should I sell my Soyabean now or store it for better mandi prices?')" class="px-3 py-1 rounded-full bg-slate-100 hover:bg-emerald-100 hover:text-emerald-800 text-slate-700 font-medium whitespace-nowrap transition border border-slate-200">
+            📈 Soyabean Market Timing
+          </button>
+          <button id="prompt-schemes" onclick="sendQuickPrompt('What are the key government schemes and subsidies available for farmers?')" class="px-3 py-1 rounded-full bg-slate-100 hover:bg-emerald-100 hover:text-emerald-800 text-slate-700 font-medium whitespace-nowrap transition border border-slate-200">
+            🏛️ PM-KISAN & PMFBY Guide
+          </button>
+        </div>
+
+        <!-- Chat Input Bar -->
+        <div class="p-4 bg-white border-t border-slate-200 flex items-center space-x-3">
+          <button onclick="startVoiceRecognition()" id="btn-mic" title="Speak your question (Hindi/English)" class="p-2.5 rounded-xl bg-slate-100 hover:bg-emerald-100 text-slate-600 hover:text-emerald-700 transition">
+            <i data-lucide="mic" class="w-5 h-5"></i>
+          </button>
+          <input type="text" id="chat-input" onkeydown="handleChatKey(event)" placeholder="Ask about crop selection, mandi prices, weather risks, or fertilizers..." class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          <button onclick="sendChatMessage()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition shadow">
+            <span>Send</span>
+            <i data-lucide="send" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-white border-t border-slate-200 py-6 mt-12 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-3">
+      <div class="flex items-center space-x-2">
+        <i data-lucide="sprout" class="w-4 h-4 text-emerald-600"></i>
+        <span class="font-bold text-slate-700">AgriMitra AI Platform</span>
+        <span>• Climate Intelligence & Market Decision Support for India</span>
+      </div>
+      <div class="text-[11px] text-slate-400">
+        Empowering Sustainable Agriculture • Resilience • Resource Optimization
+      </div>
+    </div>
+  </footer>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // Global State
+    let currentLang = 'en';
+    let globalAudioEnabled = true;
+    let trendChartInstance = null;
+    let weatherDataCache = null;
+
+    // Translations Dictionary for 5 Indian Languages
+    const I18N = {
+      en: {
+        announcement: "🌾 National Agrometeorological & APMC Mandi Network Live • Supporting Sustainable & Resilient Agriculture",
+        tabWeather: "Climate & Weather Advisory",
+        tabClimateRisk: "Climate Risk Advisor (Disaster Shield)",
+        tabMandi: "Mandi Live Prices & MSP",
+        tabMarketIntel: "Market Intelligence (When & Where to Sell ⭐)",
+        tabArbitrage: "Where to Sell (Profit Arbitrage)",
+        tabCrop: "What to Grow (Decision Matrix)",
+        tabAiAdvisor: "AI Crop Advisor (Soil & NPK Plan)",
+        tabAdvisor: "AgriMitra AI Assistant",
+        climateRiskTitle: "Climate Risk Guard & Early Warning",
+        sevenDayTitle: "7-Day Farming Weather Forecast & Field Actions",
+        voiceRead: "Voice Readout",
+        listen: "Listen",
+        readWeatherAdvisory: "Listen to Regional Agromet Advisory",
+        chatSubtitle: "5 Languages Supported (English, తెలుగు, हिन्दी, தமிழ், ಕನ್ನಡ) • Real-time Climate & Mandi Advisory",
+        chatWelcomeTitle: "Namaste! I am your AgriMitra AI Agricultural Decision Advisor.",
+        chatWelcomeSubtitle: "I provide specialized agronomic and market intelligence powered by Amazon Bedrock:",
+        chatWelcomeFooter: "Click any prompt below or type/speak in English, తెలుగు, हिन्दी, தமிழ், or ಕನ್ನಡ.",
+        chatPlaceholder: "Ask in English, తెలుగు, हिन्दी, தமிழ், ಕನ್ನಡ about crops, mandi prices, or weather...",
+        promptCyclone: "🌧️ Unseasonal Rain & Cyclone Mitigation",
+        promptAltCrop: "🌱 Low-Water Alternative Crops",
+        promptMandi: "📈 Soyabean Market Timing (Sell vs Hold)",
+        promptSchemes: "🏛️ PM-KISAN & PMFBY Guide"
+      },
+      te: {
+        announcement: "🌾 జాతీయ వ్యవసాయ వాతావరణం మరియు APMC మార్కెట్ నెట్‌వర్క్ లైవ్ • రైతులకు స్మార్ట్ నిర్ణయ వేదిక",
+        tabWeather: "వాతావరణం & వ్యవసాయ సూచనలు",
+        tabClimateRisk: "వాతావరణ ప్రమాద రక్షక కవచం (డిజాస్టర్ షీల్డ్)",
+        tabMandi: "మార్కెట్ ధరలు & కనీస మద్దతు ధర (MSP)",
+        tabMarketIntel: "మార్కెట్ ఇంటెలిజెన్స్ (అమ్మాలా లేదా దాచాలా? ⭐)",
+        tabArbitrage: "ఎక్కడ అమ్మాలి? (లాభాల లెక్క)",
+        tabCrop: "ఏ పంట వేయాలి? (సాగు ఎంపిక)",
+        tabAiAdvisor: "AI పంట & ఎరువుల సలహాదారు (NPK ప్లాన్)",
+        tabAdvisor: "అగ్రిమిత్ర AI సహాయకుడు",
+        climateRiskTitle: "వాతావరణ ప్రమాద ముందస్తు హెచ్చరిక",
+        sevenDayTitle: "7 రోజుల వాతావరణ అంచనా & చేయవలసిన పనులు",
+        voiceRead: "వాయిస్ ద్వారా వినండి",
+        listen: "వినండి",
+        readWeatherAdvisory: "ప్రాంతీయ వ్యవసాయ వాతావరణ సూచన వినండి",
+        chatSubtitle: "5 భాషల్లో మద్దతు (English, తెలుగు, हिन्दी, தமிழ், ಕನ್ನಡ) • Amazon Bedrock ద్వారా నడుస్తుంది",
+        chatWelcomeTitle: "నమస్కారం! నేను మీ అగ్రిమిత్ర AI వ్యవసాయ నిర్ణయ సలహాదారుని.",
+        chatWelcomeSubtitle: "వాతావరణ మార్పులు మరియు మార్కెట్ ధరలపై నేను మీకు సహాయం చేస్తాను:",
+        chatWelcomeFooter: "క్రింది ప్రశ్నలలో ఒకదాన్ని ఎంచుకోండి లేదా తెలుగులో మాట్లాడండి/టైప్ చేయండి.",
+        chatPlaceholder: "పంటలు, మార్కెట్ ధరలు లేదా ఎరువుల గురించి తెలుగులో అడగండి...",
+        promptCyclone: "🌧️ అకాల వర్షాలు & తుఫాను రక్షణ",
+        promptAltCrop: "🌱 తక్కువ నీటితో పండే ప్రత్యామ్నాయ పంటలు",
+        promptMandi: "📈 సోయాబీన్ అమ్మకపు సమయం (అమ్మాలా? దాచాలా?)",
+        promptSchemes: "🏛️ PM-కిసాన్ & PMFBY పథకాలు"
+      },
+      hi: {
+        announcement: "🌾 राष्ट्रीय कृषि मौसम व APMC मंडी नेटवर्क लाइव • सतत व जलवायु-सक्षम कृषि का साथी",
+        tabWeather: "मौसम व कृषि सलाह",
+        tabClimateRisk: "जलवायु जोखिम सुरक्षा कवच (आपदा प्रबंधन)",
+        tabMandi: "मंडी लाइव भाव व MSP",
+        tabMarketIntel: "मार्केट इंटेलिजेंस (कब और कहाँ बेचें? ⭐)",
+        tabArbitrage: "कहाँ बेचें? (मुनाफा कैलकुलेटर)",
+        tabCrop: "क्या और कब उगाएं? (सटीक चयन)",
+        tabAiAdvisor: "AI फसल व खाद सलाहकार (NPK शेड्यूल)",
+        tabAdvisor: "कृषि मित्र AI सहायक",
+        climateRiskTitle: "जलवायु जोखिम सुरक्षा कवच",
+        sevenDayTitle: "7 दिवसीय कृषि मौसम पूर्वानुमान व आवश्यक कार्य",
+        voiceRead: "आवाज से सुनें",
+        listen: "सुनें",
+        readWeatherAdvisory: "क्षेत्रीय कृषि मौसम सलाह सुनें",
+        chatSubtitle: "5 भाषाओं में उपलब्ध (English, తెలుగు, हिन्दी, தமிழ், ಕನ್ನಡ) • Amazon Bedrock द्वारा संचालित",
+        chatWelcomeTitle: "नमस्ते! मैं आपका कृषि मित्र AI कृषि निर्णय सलाहकार हूँ।",
+        chatWelcomeSubtitle: "मौसम जोखिम, फसल चयन और मंडी रणनीति में आपकी पूरी सहायता कर सकता हूँ:",
+        chatWelcomeFooter: "नीचे दिए गए सुझाव पर क्लिक करें या हिन्दी में बोलें/लिखें।",
+        chatPlaceholder: "फसल, मंडी भाव, मौसम जोखिम या खाद के बारे में हिन्दी में पूछें...",
+        promptCyclone: "🌧️ बेमौसम बारिश व आंधी से सुरक्षा",
+        promptAltCrop: "🌱 कम पानी वाली वैकल्पिक फसलें",
+        promptMandi: "📈 सोयाबीन बिक्री का सही समय (बेचें या रोकें)",
+        promptSchemes: "🏛️ पीएम-किसान व फसल बीमा गाइड"
+      },
+      ta: {
+        announcement: "🌾 தேசிய வேளாண் வானிலை மற்றும் APMC சந்தை நெட்வொர்க் நேரலை • விவசாயிகளுக்கான வழிகாட்டி",
+        tabWeather: "வானிலை & வேளாண் ஆலோசனை",
+        tabClimateRisk: "பருவநிலை இடர் பாதுகாப்பு (பேரிடர் கவசம்)",
+        tabMandi: "சந்தை நேரலை விலை & MSP",
+        tabMarketIntel: "சந்தை நுண்ணறிவு (எப்போது, எங்கு விற்பது? ⭐)",
+        tabArbitrage: "எங்கு விற்கலாம்? (லாபக் கணக்கீடு)",
+        tabCrop: "என்ன பயிரிடலாம்? (பயிர் தேர்வு)",
+        tabAiAdvisor: "AI பயிர் & உர ஆலோசகர் (NPK திட்டம்)",
+        tabAdvisor: "அக்ரிமித்ரா AI உதவியாளர்",
+        climateRiskTitle: "பருவநிலை இடர் முன்னெச்சரிக்கை",
+        sevenDayTitle: "7 நாள் வானிலை முன்னறிவிப்பு & செய்ய வேண்டிய பணிகள்",
+        voiceRead: "குரல் வழி கேட்க",
+        listen: "கேட்க",
+        readWeatherAdvisory: "மண்டல வேளாண் ஆலோசனையைக் கேட்க",
+        chatSubtitle: "5 மொழிகளில் சேவை (English, తెలుగు, हिन्दी, தமிழ், ಕನ್ನಡ) • Amazon Bedrock ஆதரவுடன்",
+        chatWelcomeTitle: "வணக்கம்! நான் உங்கள் அக்ரிமித்ரா AI விவசாய முடிவெடுக்கும் ஆலோசகர்.",
+        chatWelcomeSubtitle: "வானிலை அபாயங்கள் மற்றும் சந்தை நுண்ணறிவில் உங்களுக்கு வழிகாட்டுகிறேன்:",
+        chatWelcomeFooter: "கீழே உள்ள கேள்விகளில் ஒன்றைத் தேர்ந்தெடுக்கவும் அல்லது தமிழில் பேசவும்/எழுதவும்.",
+        chatPlaceholder: "பயிர்கள், சந்தை விலைகள் அல்லது உரங்கள் பற்றி தமிழில் கேளுங்கள்...",
+        promptCyclone: "🌧️ பருவம் தவறிய மழை & புயல் பாதுகாப்பு",
+        promptAltCrop: "🌱 குறைந்த நீர் தேவைப்படும் மாற்றுப் பயிர்கள்",
+        promptMandi: "📈 சோயாபீன் சந்தை நேரம் (விற்பதா? சேமிப்பதா?)",
+        promptSchemes: "🏛️ PM-கிசான் & PMFBY பயிர் காப்பீடு"
+      },
+      kn: {
+        announcement: "🌾 ರಾಷ್ಟ್ರೀಯ ಕೃಷಿ ಹವಾಮಾನ ಮತ್ತು APMC ಮಾರುಕಟ್ಟೆ ಜಾಲ ನೇರಪ್ರಸಾರ • ರೈತರ ನಿರ್ಧಾರ ವೇದಿಕೆ",
+        tabWeather: "ಹವಾಮಾನ & ಕೃಷಿ ಸಲಹೆ",
+        tabClimateRisk: "ಹವಾಮಾನ ಅಪಾಯ ರಕ್ಷಾ ಕವಚ (ವಿಪತ್ತು ನಿರ್ವಹಣೆ)",
+        tabMandi: "ಮಾರುಕಟ್ಟೆ ಲೈವ್ ದರಗಳು & MSP",
+        tabMarketIntel: "ಮಾರುಕಟ್ಟೆ ಇಂಟೆಲಿಜೆನ್ಸ್ (ಯಾವಾಗ, ಎಲ್ಲಿ ಮಾರಾಟ ಮಾಡಬೇಕು? ⭐)",
+        tabArbitrage: "ಎಲ್ಲಿ ಮಾರಾಟ ಮಾಡಬೇಕು? (ಲಾಭ ಕ್ಯಾಲ್ಕುಲೇಟರ್)",
+        tabCrop: "ಯಾವ ಬೆಳೆ ಬೆಳೆಯಬೇಕು? (ಬೆಳೆ ಆಯ್ಕೆ)",
+        tabAiAdvisor: "AI ಬೆಳೆ & ರಸಗೊಬ್ಬರ ಸಲಹೆಗಾರ (NPK ಯೋಜನೆ)",
+        tabAdvisor: "ಅಗ್ರಿಮಿತ್ರ AI ಸಹಾಯಕ",
+        climateRiskTitle: "ಹವಾಮಾನ ಅಪಾಯ ಮುನ್ನೆಚ್ಚರಿಕೆ",
+        sevenDayTitle: "7 ದಿನಗಳ ಹವಾಮಾನ ಮುನ್ಸೂಚನೆ & ಕೃಷಿ ಕಾರ್ಯಗಳು",
+        voiceRead: "ಧ್ವನಿ ಮೂಲಕ ಆಲಿಸಿ",
+        listen: "ಆಲಿಸಿ",
+        readWeatherAdvisory: "ಪ್ರಾದೇಶಿಕ ಕೃಷಿ ಹವಾಮಾನ ಸಲಹೆ ಆಲಿಸಿ",
+        chatSubtitle: "5 ಭಾಷೆಗಳಲ್ಲಿ ಬೆಂಬಲ (English, తెలుగు, हिन्दी, தமிழ், ಕನ್ನಡ) • Amazon Bedrock ನಿಂದ ಚಾಲಿತ",
+        chatWelcomeTitle: "ನಮಸ್ಕಾರ! ನಾನು ನಿಮ್ಮ ಅಗ್ರಿಮಿತ್ರ AI ಕೃಷಿ ನಿರ್ಧಾರ ಸಲಹೆಗಾರ.",
+        chatWelcomeSubtitle: "ಹವಾಮಾನ ಅಪಾಯಗಳು ಮತ್ತು ಮಾರುಕಟ್ಟೆ ನಿರ್ಧಾರಗಳಲ್ಲಿ ನಾನು ನಿಮ್ಮ ಮಾರ್ಗದರ್ಶಕ:",
+        chatWelcomeFooter: "ಕೆಳಗಿನ ಪ್ರಶ್ನೆಗಳಲ್ಲಿ ಒಂದನ್ನು ಆಯ್ಕೆಮಾಡಿ ಅಥವಾ ಕನ್ನಡದಲ್ಲಿ ಮಾತನಾಡಿ/ಬರೆಯಿರಿ.",
+        chatPlaceholder: "ಬೆಳೆಗಳು, ಮಾರುಕಟ್ಟೆ ದರಗಳು ಅಥವಾ ರಸಗೊಬ್ಬರಗಳ ಕುರಿತು ಕನ್ನಡದಲ್ಲಿ ಕೇಳಿ...",
+        promptCyclone: "🌧️ ಅಕಾಲಿಕ ಮಳೆ & ಬಿರುಗಾಳಿ ರಕ್ಷಣೆ",
+        promptAltCrop: "🌱 ಕಡಿಮೆ ನೀರಿನ ಪರ್ಯಾಯ ಬೆಳೆಗಳು",
+        promptMandi: "📈 ಸೋಯಾಬೀನ್ ಮಾರಾಟದ ಸಮಯ (ಮಾರಾಟವೇ? ಸಂಗ್ರಹವೇ?)",
+        promptSchemes: "🏛️ ಪಿಎಂ-ಕಿಸಾನ್ & PMFBY ಬೆಳೆ ವಿಮೆ"
+      }
+    };
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      const langs = ['en', 'te', 'hi', 'ta', 'kn'];
+      langs.forEach(l => {
+        const btn = document.getElementById(`lang-${l}`);
+        if (btn) {
+          if (l === lang) {
+            btn.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-white text-brand-900 transition shadow";
+          } else {
+            btn.className = "px-2.5 py-1 rounded-lg text-xs font-bold text-brand-200 hover:text-white transition";
+          }
+        }
+      });
+
+      const t = I18N[lang] || I18N.en;
+      if (document.getElementById('announcement-text')) document.getElementById('announcement-text').innerText = t.announcement;
+      if (document.querySelector('.tab-label-weather')) document.querySelector('.tab-label-weather').innerText = t.tabWeather;
+      if (document.querySelector('.tab-label-climate-risk-adv')) document.querySelector('.tab-label-climate-risk-adv').innerText = t.tabClimateRisk;
+      if (document.querySelector('.tab-label-mandi')) document.querySelector('.tab-label-mandi').innerText = t.tabMandi;
+      if (document.querySelector('.tab-label-market-intel')) document.querySelector('.tab-label-market-intel').innerText = t.tabMarketIntel;
+      if (document.querySelector('.tab-label-arbitrage')) document.querySelector('.tab-label-arbitrage').innerText = t.tabArbitrage;
+      if (document.querySelector('.tab-label-crop')) document.querySelector('.tab-label-crop').innerText = t.tabCrop;
+      if (document.querySelector('.tab-label-ai-advisor')) document.querySelector('.tab-label-ai-advisor').innerText = t.tabAiAdvisor;
+      if (document.querySelector('.tab-label-advisor')) document.querySelector('.tab-label-advisor').innerText = t.tabAdvisor;
+      if (document.querySelector('.txt-climate-risk-title')) document.querySelector('.txt-climate-risk-title').innerText = t.climateRiskTitle;
+      if (document.querySelector('.txt-7day-title')) document.querySelector('.txt-7day-title').innerText = t.sevenDayTitle;
+      if (document.getElementById('txt-voice-read')) document.getElementById('txt-voice-read').innerText = t.voiceRead;
+      if (document.getElementById('btn-read-weather-advisory')) document.getElementById('btn-read-weather-advisory').innerText = t.readWeatherAdvisory;
+
+      // Chat translations
+      if (document.getElementById('chat-subtitle')) document.getElementById('chat-subtitle').innerText = t.chatSubtitle;
+      if (document.getElementById('chat-welcome-title')) document.getElementById('chat-welcome-title').innerText = t.chatWelcomeTitle;
+      if (document.getElementById('chat-welcome-subtitle')) document.getElementById('chat-welcome-subtitle').innerText = t.chatWelcomeSubtitle;
+      if (document.getElementById('chat-welcome-footer')) document.getElementById('chat-welcome-footer').innerText = t.chatWelcomeFooter;
+      if (document.getElementById('chat-input')) document.getElementById('chat-input').placeholder = t.chatPlaceholder;
+      if (document.getElementById('prompt-cyclone')) document.getElementById('prompt-cyclone').innerText = t.promptCyclone;
+      if (document.getElementById('prompt-alt-crop')) document.getElementById('prompt-alt-crop').innerText = t.promptAltCrop;
+      if (document.getElementById('prompt-mandi')) document.getElementById('prompt-mandi').innerText = t.promptMandi;
+      if (document.getElementById('prompt-schemes')) document.getElementById('prompt-schemes').innerText = t.promptSchemes;
+    }
+
+    // Tab Switching
+    function switchTab(tabId) {
+      const panels = ['climate', 'climate-advisor-tool', 'mandi', 'market-intel-tool', 'arbitrage', 'crop-engine', 'ai-advisor-tool', 'advisor'];
+      panels.forEach(p => {
+        document.getElementById(`panel-${p}`).classList.add('hidden');
+        document.getElementById(`tab-${p}`).classList.remove('tab-active');
+      });
+
+      document.getElementById(`panel-${tabId}`).classList.remove('hidden');
+      document.getElementById(`tab-${tabId}`).classList.add('tab-active');
+
+      if (tabId === 'mandi' && !trendChartInstance) {
+        loadPriceTrends('Soyabean');
+        loadMandiPrices();
+      } else if (tabId === 'market-intel-tool') {
+        runMarketIntelligence();
+      } else if (tabId === 'arbitrage') {
+        calculateArbitrage();
+      } else if (tabId === 'crop-engine') {
+        evaluateCrops();
+      } else if (tabId === 'ai-advisor-tool') {
+        runFullCropAdvisor();
+      } else if (tabId === 'climate-advisor-tool') {
+        runClimateRiskAssessment();
+      }
+      lucide.createIcons();
+    }
+
+    // Speech Synthesis
+    function speakText(text) {
+      if (!window.speechSynthesis) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      const langMap = {
+        'en': 'en-IN',
+        'te': 'te-IN',
+        'hi': 'hi-IN',
+        'ta': 'ta-IN',
+        'kn': 'kn-IN'
+      };
+      utterance.lang = langMap[currentLang] || 'en-IN';
+      utterance.rate = 0.95;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function toggleAudioGlobal() {
+      globalAudioEnabled = !globalAudioEnabled;
+      const btn = document.getElementById('btn-audio-global');
+      const audioEnabledMsgs = {
+        'en': "Voice readout enabled",
+        'te': "వాయిస్ రీడౌట్ ప్రారంభించబడింది",
+        'hi': "आवाज सुविधा सक्रिय है",
+        'ta': "குரல் வாசிப்பு இயக்கப்பட்டது",
+        'kn': "ಧ್ವನಿ ಓದುವಿಕೆ ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"
+      };
+      if (globalAudioEnabled) {
+        btn.classList.remove('bg-slate-700');
+        btn.classList.add('bg-emerald-700/60');
+        speakText(audioEnabledMsgs[currentLang] || audioEnabledMsgs.en);
+      } else {
+        btn.classList.remove('bg-emerald-700/60');
+        btn.classList.add('bg-slate-700');
+        window.speechSynthesis.cancel();
+      }
+    }
+
+    function readAloudAdvisory() {
+      if (!weatherDataCache) return;
+      const text = `${weatherDataCache.current.agri_advisory}. Heat stress risk is ${weatherDataCache.climate_intelligence.heat_stress_risk}. Spraying condition is ${weatherDataCache.climate_intelligence.spraying_suitability}.`;
+      speakText(text);
+    }
+
+    // Voice Input (Speech Recognition)
+    function startVoiceRecognition() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        alert("Speech recognition is not supported in this browser. Please use Chrome or Edge.");
+        return;
+      }
+      const recognition = new SpeechRecognition();
+      const langMap = {
+        'en': 'en-IN',
+        'te': 'te-IN',
+        'hi': 'hi-IN',
+        'ta': 'ta-IN',
+        'kn': 'kn-IN'
+      };
+      recognition.lang = langMap[currentLang] || 'en-IN';
+      const micBtn = document.getElementById('btn-mic');
+      micBtn.classList.add('bg-red-100', 'text-red-600', 'animate-pulse');
+
+      recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById('chat-input').value = transcript;
+        sendChatMessage();
+      };
+      recognition.onend = function() {
+        micBtn.classList.remove('bg-red-100', 'text-red-600', 'animate-pulse');
+      };
+      recognition.start();
+    }
+
+    // Location Change Handler
+    function onLocationChange() {
+      const select = document.getElementById('state-select');
+      const opt = select.options[select.selectedIndex];
+      const lat = opt.getAttribute('data-lat');
+      const lon = opt.getAttribute('data-lon');
+      const name = opt.text;
+      fetchWeather(lat, lon, name);
+    }
+
+    function detectGPSLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          pos => {
+            fetchWeather(pos.coords.latitude, pos.coords.longitude, "Your Current Farm");
+          },
+          err => {
+            alert("Could not access GPS. Using default state selection.");
+          }
+        );
+      }
+    }
+
+    // Fetch Weather
+    async function fetchWeather(lat, lon, name) {
+      try {
+        const res = await fetch(`/api/weather?lat=${lat}&lon=${lon}&name=${encodeURIComponent(name)}`);
+        const json = await res.json();
+        if (json.status === 'success') {
+          weatherDataCache = json;
+          updateWeatherUI(json);
+        }
+      } catch (err) {
+        console.error("Weather fetch failed:", err);
+      }
+    }
+
+    function updateWeatherUI(data) {
+      document.getElementById('weather-loc-tag').innerText = `${data.location} Agro-Zone`;
+      document.getElementById('weather-condition').innerText = data.current.condition;
+      document.getElementById('weather-advisory-cur').innerText = data.current.agri_advisory;
+      document.getElementById('weather-temp').innerText = `${data.current.temp_c}°C`;
+      document.getElementById('weather-humidity').innerText = `${data.current.humidity_pct}%`;
+      document.getElementById('weather-rain').innerText = `${data.current.precipitation_mm} mm`;
+      document.getElementById('weather-wind').innerText = `${data.current.wind_kmh} km/h`;
+      document.getElementById('weather-spray').innerText = data.climate_intelligence.spraying_suitability;
+
+      // Risk Badges
+      const riskHeat = document.getElementById('risk-heat');
+      riskHeat.innerText = data.climate_intelligence.heat_stress_risk;
+      riskHeat.className = `text-xs font-bold px-2 py-0.5 rounded ${data.climate_intelligence.heat_stress_risk === 'High' ? 'bg-red-100 text-red-800' : 'bg-emerald-100 text-emerald-800'}`;
+
+      const riskPest = document.getElementById('risk-pest');
+      riskPest.innerText = data.climate_intelligence.pest_fungal_risk;
+      riskPest.className = `text-xs font-bold px-2 py-0.5 rounded ${data.climate_intelligence.pest_fungal_risk === 'High' ? 'bg-red-100 text-red-800' : (data.climate_intelligence.pest_fungal_risk === 'Moderate' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800')}`;
+
+      document.getElementById('risk-harvest').innerText = data.climate_intelligence.harvesting_suitability;
+
+      // Unseasonal Rain Alert Banner
+      const alertBanner = document.getElementById('weather-alert-banner');
+      if (data.climate_intelligence.unseasonal_rain_alert) {
+        alertBanner.classList.remove('hidden');
+      } else {
+        alertBanner.classList.add('hidden');
+      }
+
+      // 7-Day Forecast Grid
+      const fContainer = document.getElementById('forecast-container');
+      fContainer.innerHTML = '';
+      data.forecast_7day.forEach((d, idx) => {
+        const card = document.createElement('div');
+        card.className = `p-3 rounded-xl border ${idx === 0 ? 'bg-emerald-50/70 border-emerald-300' : 'bg-slate-50 border-slate-200'} text-center flex flex-col justify-between`;
+        card.innerHTML = `
+          <div>
+            <span class="text-xs font-bold text-slate-800 block">${d.day_name}</span>
+            <span class="text-[10px] text-slate-500">${d.date.slice(5)}</span>
+            <div class="my-2 text-2xl">${d.icon_type === 'rain' || d.icon_type === 'heavy-rain' ? '🌧️' : (d.icon_type === 'cloudy' ? '⛅' : '☀️')}</div>
+            <div class="text-xs font-bold text-slate-900">${d.max_temp}° / <span class="text-slate-500 font-normal">${d.min_temp}°</span></div>
+            <div class="text-[10px] text-blue-600 font-semibold mt-1">💧 ${d.precip_prob_pct}% (${d.precip_sum_mm}mm)</div>
+          </div>
+          <div class="mt-2 pt-2 border-t border-slate-200 text-[10px] text-slate-600 line-clamp-2" title="${d.advisory}">
+            ${d.advisory}
+          </div>
+        `;
+        fContainer.appendChild(card);
+      });
+      lucide.createIcons();
+    }
+
+    // Mandi Rates Loader
+    async function loadMandiPrices() {
+      const crop = document.getElementById('mandi-filter-crop').value;
+      const state = document.getElementById('mandi-filter-state').value;
+      try {
+        const res = await fetch(`/api/mandi/prices?crop=${encodeURIComponent(crop)}&state=${encodeURIComponent(state)}`);
+        const json = await res.json();
+        if (json.status === 'success') {
+          renderMandiTable(json.data);
+          document.getElementById('mandi-count').innerText = `${json.data.length} Listings`;
+          if (crop !== 'all') {
+            loadPriceTrends(crop);
+          }
+        }
+      } catch (err) {
+        console.error("Mandi prices error:", err);
+      }
+    }
+
+    function renderMandiTable(items) {
+      const tbody = document.getElementById('mandi-table-body');
+      tbody.innerHTML = '';
+      if (items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-slate-400">No APMC mandi records found for this filter.</td></tr>`;
+        return;
+      }
+
+      items.forEach(m => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition";
+        
+        let mspBadge = `<span class="text-slate-400">N/A</span>`;
+        if (m.msp) {
+          if (m.msp_diff >= 0) {
+            mspBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800">
+              ▲ +₹${m.msp_diff} (${m.msp_diff_pct}%)
+            </span>`;
+          } else {
+            mspBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-amber-100 text-amber-800">
+              ▼ -₹${Math.abs(m.msp_diff)} (${m.msp_diff_pct}%)
+            </span>`;
+          }
+        }
+
+        tr.innerHTML = `
+          <td class="py-3 px-4">
+            <span class="font-bold text-slate-800 block">${m.mandi_name}</span>
+            <span class="text-[11px] text-slate-500">${m.district}, ${m.state}</span>
+          </td>
+          <td class="py-3 px-4 font-semibold text-slate-700">${m.crop}</td>
+          <td class="py-3 px-4">
+            <span class="text-sm font-extrabold text-emerald-700">₹${m.modal_price.toLocaleString('en-IN')}</span>
+            <span class="text-[10px] text-slate-400 block">per Quintal</span>
+          </td>
+          <td class="py-3 px-4 text-slate-600">₹${m.min_price} - ₹${m.max_price}</td>
+          <td class="py-3 px-4">${mspBadge}</td>
+          <td class="py-3 px-4 text-slate-600 font-medium">${m.arrival_tonnes.toLocaleString('en-IN')} MT</td>
+          <td class="py-3 px-4">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${m.demand === 'Very High' ? 'bg-red-100 text-red-700' : (m.demand === 'High' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600')}">
+              ${m.demand}
+            </span>
+          </td>
+          <td class="py-3 px-4 text-right">
+            <button onclick="calculateArbitrageForCrop('${m.crop}')" class="px-3 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-bold transition">
+              Arbitrage
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      lucide.createIcons();
+    }
+
+    // Chart & Trend Loader
+    async function loadPriceTrends(crop) {
+      try {
+        const res = await fetch(`/api/mandi/trends?crop=${encodeURIComponent(crop)}`);
+        const json = await res.json();
+        if (json.status === 'success') {
+          renderChart(json);
+          document.getElementById('chart-crop-title').innerText = `${crop}: 30-Day APMC History & 14-Day AI Forecast`;
+          document.getElementById('msp-benchmark-tag').innerText = `Official MSP: ₹${json.msp.toLocaleString('en-IN')}/Qtl`;
+          document.getElementById('market-sentiment-title').innerText = json.market_sentiment;
+          document.getElementById('market-advisory-action').innerText = json.action_advisory;
+        }
+      } catch (err) {
+        console.error("Trends fetch failed:", err);
+      }
+    }
+
+    function renderChart(data) {
+      const ctx = document.getElementById('trendChart').getContext('2d');
+      if (trendChartInstance) {
+        trendChartInstance.destroy();
+      }
+
+      const allLabels = [...data.history.dates, ...data.forecast.dates];
+      const histData = [...data.history.prices, ...new Array(data.forecast.dates.length).fill(null)];
+      const foreData = [...new Array(data.history.dates.length - 1).fill(null), data.history.prices[data.history.prices.length - 1], ...data.forecast.prices];
+      const mspLine = new Array(allLabels.length).fill(data.msp);
+
+      trendChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: allLabels,
+          datasets: [
+            {
+              label: 'Historical Mandi Price',
+              data: histData,
+              borderColor: '#16a34a',
+              backgroundColor: 'rgba(22, 163, 74, 0.08)',
+              borderWidth: 2.5,
+              tension: 0.25,
+              fill: true,
+              pointRadius: 2
+            },
+            {
+              label: 'AI 14-Day Projected Price',
+              data: foreData,
+              borderColor: '#2563eb',
+              borderDash: [5, 5],
+              borderWidth: 2.5,
+              tension: 0.25,
+              pointRadius: 2
+            },
+            {
+              label: 'MSP Benchmark Floor',
+              data: mspLine,
+              borderColor: '#f59e0b',
+              borderWidth: 1.5,
+              borderDash: [3, 3],
+              pointRadius: 0
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: { boxWidth: 12, font: { size: 11, family: 'Plus Jakarta Sans' } }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `${context.dataset.label}: ₹${context.raw}/Qtl`;
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              grid: { color: 'rgba(0,0,0,0.05)' },
+              ticks: { callback: v => '₹' + v }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { maxTicksLimit: 10 }
+            }
+          }
+        }
+      });
+    }
+
+    // Arbitrage Calculator
+    async function calculateArbitrage() {
+      const originSelect = document.getElementById('arb-farmer-origin');
+      const originOpt = originSelect.options[originSelect.selectedIndex];
+      const lat = parseFloat(originOpt.getAttribute('data-lat'));
+      const lon = parseFloat(originOpt.getAttribute('data-lon'));
+      const crop = document.getElementById('arb-crop').value;
+      const qty = parseFloat(document.getElementById('arb-quantity').value) || 50;
+
+      try {
+        const res = await fetch('/api/mandi/recommend-best', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            farmer_lat: lat,
+            farmer_lon: lon,
+            farmer_location_name: originOpt.text,
+            crop: crop,
+            quantity_qtl: qty
+          })
+        });
+        const json = await res.json();
+        if (json.status === 'success') {
+          renderArbitrageResults(json);
+        } else {
+          alert(json.message || "No data available for this combination.");
+        }
+      } catch (err) {
+        console.error("Arbitrage calculation failed:", err);
+      }
+    }
+
+    function calculateArbitrageForCrop(cropName) {
+      switchTab('arbitrage');
+      document.getElementById('arb-crop').value = cropName;
+      calculateArbitrage();
+    }
+
+    function renderArbitrageResults(res) {
+      document.getElementById('arbitrage-result-banner').classList.remove('hidden');
+      document.getElementById('arb-table-card').classList.remove('hidden');
+
+      const best = res.best_mandi;
+      document.getElementById('arb-best-name').innerText = `${best.mandi_name} (${best.state})`;
+      document.getElementById('arb-best-sub').innerText = `Distance: ${best.distance_km} km • Modal Price: ₹${best.modal_price}/Qtl • Demand: ${best.demand}`;
+      document.getElementById('arb-best-gross').innerText = `₹${best.gross_revenue.toLocaleString('en-IN')}`;
+      document.getElementById('arb-best-transport').innerText = `-₹${best.transport_cost.toLocaleString('en-IN')}`;
+      document.getElementById('arb-best-net').innerText = `₹${best.net_profit.toLocaleString('en-IN')}`;
+
+      document.getElementById('arb-gain-amount').innerText = `+₹${res.arbitrage_gain_inr.toLocaleString('en-IN')}`;
+      document.getElementById('arb-gain-desc').innerText = 
+        `By transporting produce to ${best.mandi_name} rather than selling at the nearest local APMC (${res.nearest_mandi.mandi_name}), you gain ₹${res.arbitrage_gain_inr.toLocaleString('en-IN')} extra in net in-hand profit after covering ₹${best.transport_cost.toLocaleString('en-IN')} in freight charges.`;
+
+      // Render Table
+      const tbody = document.getElementById('arb-table-body');
+      tbody.innerHTML = '';
+      res.all_mandis_ranked.forEach((m, idx) => {
+        const isBest = idx === 0;
+        const tr = document.createElement('tr');
+        tr.className = isBest ? "bg-emerald-50/70 font-semibold" : "hover:bg-slate-50";
+        tr.innerHTML = `
+          <td class="py-3 px-4">${isBest ? '⭐ #1' : `#${idx+1}`}</td>
+          <td class="py-3 px-4">
+            <span class="font-bold text-slate-800">${m.mandi_name}</span>
+            <span class="text-[10px] text-slate-500 block">${m.district}, ${m.state}</span>
+          </td>
+          <td class="py-3 px-4">${m.distance_km} km</td>
+          <td class="py-3 px-4 font-bold text-slate-800">₹${m.modal_price}</td>
+          <td class="py-3 px-4">₹${m.gross_revenue.toLocaleString('en-IN')}</td>
+          <td class="py-3 px-4 text-red-600">-₹${m.transport_cost.toLocaleString('en-IN')}</td>
+          <td class="py-3 px-4 text-base font-extrabold ${isBest ? 'text-emerald-700' : 'text-slate-800'}">₹${m.net_profit.toLocaleString('en-IN')}</td>
+          <td class="py-3 px-4 font-bold">₹${m.net_realized_rate_per_qtl}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+      lucide.createIcons();
+    }
+
+    // Crop Decision Engine
+    async function evaluateCrops() {
+      const season = document.getElementById('crop-season').value;
+      const soil = document.getElementById('crop-soil').value;
+      const water = document.getElementById('crop-water').value;
+      const land = parseFloat(document.getElementById('crop-land').value) || 2.0;
+
+      try {
+        const res = await fetch('/api/crop/recommend', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            season: season,
+            soil: soil,
+            water_availability: water,
+            land_acres: land
+          })
+        });
+        const json = await res.json();
+        if (json.status === 'success') {
+          renderCropRecommendations(json.top_recommendations, land);
+        }
+      } catch (err) {
+        console.error("Crop evaluation failed:", err);
+      }
+    }
+
+    function renderCropRecommendations(crops, land) {
+      const container = document.getElementById('crop-recommendations-container');
+      container.innerHTML = '';
+
+      if (crops.length === 0) {
+        container.innerHTML = `<div class="col-span-3 text-center py-8 text-slate-400">No matching crops for these exact parameters. Try loosening soil/water filters.</div>`;
+        return;
+      }
+
+      crops.forEach(c => {
+        const card = document.createElement('div');
+        card.className = "bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between hover:shadow-md transition";
+        card.innerHTML = `
+          <div>
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="text-[11px] font-bold uppercase tracking-wider text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full">${c.category}</span>
+                <h4 class="text-xl font-black text-slate-900 mt-1">${c.name} <span class="text-sm font-semibold text-slate-500">(${c.name_hi})</span></h4>
+              </div>
+              <div class="text-right">
+                <span class="text-xs text-slate-400 block font-semibold">Suitability</span>
+                <span class="text-lg font-black text-purple-700">${c.suitability_score}%</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 mt-4 text-xs">
+              <div class="bg-slate-50 p-2 rounded-xl">
+                <span class="text-slate-400 block text-[10px]">Sowing Window</span>
+                <span class="font-bold text-slate-800">${c.sowing_window}</span>
+              </div>
+              <div class="bg-slate-50 p-2 rounded-xl">
+                <span class="text-slate-400 block text-[10px]">Water Need</span>
+                <span class="font-bold text-blue-700">${c.water_requirement} (${c.water_mm})</span>
+              </div>
+              <div class="bg-slate-50 p-2 rounded-xl">
+                <span class="text-slate-400 block text-[10px]">Duration</span>
+                <span class="font-bold text-slate-800">${c.duration_days} Days</span>
+              </div>
+              <div class="bg-slate-50 p-2 rounded-xl">
+                <span class="text-slate-400 block text-[10px]">Est. Net Profit (${land} Acres)</span>
+                <span class="font-bold text-emerald-700">₹${c.est_net_margin_total.toLocaleString('en-IN')}</span>
+              </div>
+            </div>
+
+            <div class="mt-4 p-3 rounded-xl bg-purple-50/60 border border-purple-100 text-xs text-slate-700">
+              <strong class="text-purple-900 block mb-0.5">🌱 Advisory Guidance:</strong>
+              ${c.advisory_tip}
+            </div>
+
+            <div class="mt-3 text-xs text-slate-500">
+              <span class="font-semibold text-slate-700">Resilient Alternatives:</span>
+              <span class="text-purple-700 font-medium">${c.resilient_alternatives.join(', ')}</span>
+            </div>
+          </div>
+
+          <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between">
+            <button onclick="speakText('${c.name}. ${c.advisory_tip.replace(/'/g, "")}')" class="text-xs text-purple-700 hover:text-purple-900 font-semibold flex items-center gap-1">
+              <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> Listen
+            </button>
+            <button onclick="calculateArbitrageForCrop('${c.name}')" class="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-xs font-bold transition">
+              Check Mandi Rates
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+      lucide.createIcons();
+    }
+
+    // AI Advisor Chat
+    function handleChatKey(e) {
+      if (e.key === 'Enter') sendChatMessage();
+    }
+
+    function sendQuickPrompt(prompt) {
+      document.getElementById('chat-input').value = prompt;
+      sendChatMessage();
+    }
+
+    async function sendChatMessage() {
+      const input = document.getElementById('chat-input');
+      const msg = input.value.trim();
+      if (!msg) return;
+
+      appendChatMessage('user', msg);
+      input.value = '';
+
+      // Typing Indicator
+      const typingId = appendTypingIndicator();
+
+      try {
+        const res = await fetch('/api/advisor/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: msg, language: currentLang })
+        });
+        const json = await res.json();
+        removeTypingIndicator(typingId);
+        appendChatMessage('assistant', json.reply);
+
+        if (globalAudioEnabled) {
+          speakText(json.reply.replace(/[*#]/g, ''));
+        }
+      } catch (err) {
+        removeTypingIndicator(typingId);
+        appendChatMessage('assistant', "I encountered an error connecting to the agronomic knowledge base. Please try again.");
+      }
+    }
+
+    function appendChatMessage(sender, text) {
+      const container = document.getElementById('chat-messages');
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `flex items-start space-x-3 max-w-2xl ${sender === 'user' ? 'ml-auto flex-row-reverse space-x-reverse' : ''}`;
+      
+      const avatar = document.createElement('div');
+      avatar.className = `w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold ${sender === 'user' ? 'bg-slate-700 text-white' : 'bg-brand-700 text-white'}`;
+      avatar.innerText = sender === 'user' ? 'You' : 'AM';
+
+      const bubble = document.createElement('div');
+      bubble.className = `p-4 rounded-2xl text-xs leading-relaxed ${sender === 'user' ? 'bg-emerald-600 text-white rounded-tr-none' : 'bg-white text-slate-800 rounded-tl-none border border-slate-200 shadow-sm'}`;
+      bubble.innerHTML = text.replace(/\n/g, '<br>');
+
+      msgDiv.appendChild(avatar);
+      msgDiv.appendChild(bubble);
+      container.appendChild(msgDiv);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function appendTypingIndicator() {
+      const container = document.getElementById('chat-messages');
+      const id = 'typing-' + Date.now();
+      const div = document.createElement('div');
+      div.id = id;
+      div.className = "flex items-start space-x-3 max-w-2xl";
+      div.innerHTML = `
+        <div class="w-8 h-8 rounded-full bg-brand-700 text-white flex items-center justify-center flex-shrink-0 text-xs font-bold">AM</div>
+        <div class="bg-white p-3 rounded-2xl rounded-tl-none border border-slate-200 shadow-sm text-xs text-slate-400 flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-bounce"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-bounce" style="animation-delay: 0.2s"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-bounce" style="animation-delay: 0.4s"></span>
+          <span class="ml-1 text-[11px]">Analyzing agrometeorological & mandi intelligence...</span>
+        </div>
+      `;
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+      return id;
+    }
+
+    function removeTypingIndicator(id) {
+      const el = document.getElementById(id);
+      if (el) el.remove();
+    }
+
+    function clearChat() {
+      document.getElementById('chat-messages').innerHTML = '';
+      appendChatMessage('assistant', "Chat history cleared. How can I assist you today with crop selection, mandi prices, or weather protection?");
+    }
+
+    // Dedicated AI Crop Advisor
+    async function runFullCropAdvisor() {
+      const season = document.getElementById('adv-season').value;
+      const soil = document.getElementById('adv-soil').value;
+      const irrigation = document.getElementById('adv-irrigation').value;
+      const prevCrop = document.getElementById('adv-prev-crop').value;
+      const n = parseFloat(document.getElementById('adv-n').value) || 120;
+      const p = parseFloat(document.getElementById('adv-p').value) || 45;
+      const k = parseFloat(document.getElementById('adv-k').value) || 140;
+      const ph = parseFloat(document.getElementById('adv-ph').value) || 6.8;
+      const land = parseFloat(document.getElementById('adv-land').value) || 2.5;
+
+      try {
+        const res = await fetch('/api/crop/advisor-full', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            season: season,
+            soil: soil,
+            irrigation: irrigation,
+            previous_crop: prevCrop,
+            nitrogen: n,
+            phosphorus: p,
+            potassium: k,
+            ph: ph,
+            land_acres: land
+          })
+        });
+        const json = await res.json();
+        if (json.status === 'success') {
+          renderAdvisorResults(json);
+        }
+      } catch (err) {
+        console.error("Full advisor error:", err);
+      }
+    }
+
+    function renderAdvisorResults(data) {
+      document.getElementById('advisor-results-view').classList.remove('hidden');
+
+      const diag = data.soil_health_diagnostic;
+      document.getElementById('diag-n').innerText = diag.nitrogen_status;
+      document.getElementById('diag-p').innerText = diag.phosphorus_status;
+      document.getElementById('diag-k').innerText = diag.potassium_status;
+      document.getElementById('diag-ph').innerText = diag.ph_status;
+      document.getElementById('diag-remedy').innerText = `${diag.ph_remedy} ${diag.rotation_advisory}`;
+
+      const adv = data.advisory;
+      document.getElementById('adv-res-crop-name').innerText = adv.primary_crop;
+      document.getElementById('adv-res-crop-hi').innerText = `(${adv.primary_crop_hi})`;
+      document.getElementById('adv-res-intercrop').innerText = `🌱 Recommended Intercrop: ${adv.recommended_intercrop}`;
+      document.getElementById('adv-res-score').innerText = `${adv.suitability_score}%`;
+      document.getElementById('adv-res-yield').innerText = `${adv.financial_summary.projected_yield_qtl} Qtl`;
+      document.getElementById('adv-res-cost').innerText = `₹${adv.financial_summary.est_total_cost_inr.toLocaleString('en-IN')}`;
+      document.getElementById('adv-res-net').innerText = `₹${adv.financial_summary.est_net_profit_inr.toLocaleString('en-IN')}`;
+
+      // Render 4-Stage Fertilizer Schedule
+      const fertTbody = document.getElementById('adv-fertilizer-tbody');
+      fertTbody.innerHTML = '';
+      adv.fertilizer_schedule.forEach(s => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50";
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-bold text-slate-800">${s.stage}</td>
+          <td class="py-3 px-4 text-emerald-700 font-semibold">${s.timing}</td>
+          <td class="py-3 px-4 text-slate-700 font-medium">${s.nutrients}</td>
+        `;
+        fertTbody.appendChild(tr);
+      });
+
+      // Render Pest Management
+      const pestCont = document.getElementById('adv-pest-container');
+      pestCont.innerHTML = '';
+      adv.pest_management.forEach(p => {
+        const div = document.createElement('div');
+        div.className = "p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs";
+        div.innerHTML = `
+          <span class="font-bold text-red-700 block mb-1">⚠️ ${p.pest}</span>
+          <span class="text-slate-700 leading-relaxed block"><strong>Remedy:</strong> ${p.remedy}</span>
+        `;
+        pestCont.appendChild(div);
+      });
+      lucide.createIcons();
+    }
+
+    // Dedicated Climate Risk Advisor
+    async function runClimateRiskAssessment() {
+      const crop = document.getElementById('cra-crop').value;
+      const stage = document.getElementById('cra-stage').value;
+      const distSelect = document.getElementById('cra-district');
+      const distOpt = distSelect.options[distSelect.selectedIndex];
+      const district = distOpt.value;
+      const state = distOpt.getAttribute('data-state');
+
+      try {
+        const res = await fetch('/api/climate/risk-assessment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            crop: crop,
+            growth_stage: stage,
+            district: district,
+            state: state
+          })
+        });
+        const json = await res.json();
+        if (json.status === 'success') {
+          renderClimateRiskResults(json);
+        }
+      } catch (err) {
+        console.error("Climate risk assessment error:", err);
+      }
+    }
+
+    function renderClimateRiskResults(data) {
+      document.getElementById('cra-score').innerText = data.composite_risk.score;
+      const lvl = document.getElementById('cra-level');
+      lvl.innerText = data.composite_risk.level;
+      if (data.composite_risk.score >= 75) {
+        lvl.className = "inline-block mt-2 px-3 py-1 rounded-full text-xs font-extrabold bg-red-200 text-red-900";
+      } else if (data.composite_risk.score >= 55) {
+        lvl.className = "inline-block mt-2 px-3 py-1 rounded-full text-xs font-extrabold bg-orange-200 text-orange-900";
+      } else {
+        lvl.className = "inline-block mt-2 px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-200 text-emerald-900";
+      }
+
+      document.getElementById('cra-summary').innerText = data.composite_risk.summary;
+
+      // Update Threat Meters
+      const t = data.threat_indices;
+      document.getElementById('cra-val-rain').innerText = `${t.unseasonal_rain}% (${t.unseasonal_rain > 75 ? 'Severe' : (t.unseasonal_rain > 50 ? 'High' : 'Moderate')})`;
+      document.getElementById('cra-bar-rain').style.width = `${t.unseasonal_rain}%`;
+
+      document.getElementById('cra-val-heat').innerText = `${t.terminal_heat}% (${t.terminal_heat > 75 ? 'Critical' : (t.terminal_heat > 50 ? 'Elevated' : 'Low')})`;
+      document.getElementById('cra-bar-heat').style.width = `${t.terminal_heat}%`;
+
+      document.getElementById('cra-val-wind').innerText = `${t.cyclone_wind}% (${t.cyclone_wind > 60 ? 'High Lodging' : 'Manageable'})`;
+      document.getElementById('cra-bar-wind').style.width = `${t.cyclone_wind}%`;
+
+      document.getElementById('cra-val-frost').innerText = `${t.frost_cold}% (${t.frost_cold > 60 ? 'Frost Hazard' : 'Minimal'})`;
+      document.getElementById('cra-bar-frost').style.width = `${t.frost_cold}%`;
+
+      document.getElementById('cra-val-drought').innerText = `${t.drought_deficit}% (${t.drought_deficit > 60 ? 'Severe Deficit' : 'Tolerable'})`;
+      document.getElementById('cra-bar-drought').style.width = `${t.drought_deficit}%`;
+
+      // Update Pre Actions
+      const preList = document.getElementById('cra-pre-actions');
+      preList.innerHTML = '';
+      data.emergency_protocols.pre_disaster_actions.forEach(act => {
+        const li = document.createElement('li');
+        li.className = "flex items-start gap-2 bg-amber-50/70 p-2.5 rounded-xl border border-amber-100";
+        li.innerHTML = `<span class="text-amber-700 font-bold">⚠️</span><span>${act}</span>`;
+        preList.appendChild(li);
+      });
+
+      // Update Post Actions
+      const postList = document.getElementById('cra-post-actions');
+      postList.innerHTML = '';
+      data.emergency_protocols.post_disaster_actions.forEach(act => {
+        const li = document.createElement('li');
+        li.className = "flex items-start gap-2 bg-emerald-50/70 p-2.5 rounded-xl border border-emerald-100";
+        li.innerHTML = `<span class="text-emerald-700 font-bold">✅</span><span>${act}</span>`;
+        postList.appendChild(li);
+      });
+
+      // Update Resilient Varieties
+      const varCont = document.getElementById('cra-varieties-container');
+      varCont.innerHTML = '';
+      data.resilient_varieties.forEach(v => {
+        const span = document.createElement('span');
+        span.className = "px-3 py-1 bg-emerald-100 text-emerald-900 rounded-lg font-bold border border-emerald-200 flex items-center gap-1.5";
+        span.innerHTML = `🌾 ${v}`;
+        varCont.appendChild(span);
+      });
+      lucide.createIcons();
+    }
+
+    // Dedicated Market Intelligence Suite
+    async function runMarketIntelligence() {
+      const crop = document.getElementById('mi-crop') ? document.getElementById('mi-crop').value : 'Soyabean';
+      const qty = parseFloat(document.getElementById('mi-quantity') ? document.getElementById('mi-quantity').value : 80) || 80;
+      const distSelect = document.getElementById('mi-district');
+      const distOpt = distSelect ? distSelect.options[distSelect.selectedIndex] : null;
+      const district = distOpt ? distOpt.value : 'Nashik';
+      const state = distOpt ? distOpt.getAttribute('data-state') : 'Maharashtra';
+
+      try {
+        const res = await fetch('/api/market/intelligence', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            crop: crop,
+            farmer_district: district,
+            farmer_state: state,
+            quantity_qtl: qty
+          })
+        });
+        const json = await res.json();
+        if (json.status === 'success') {
+          renderMarketIntelligence(json);
+        }
+      } catch (err) {
+        console.error("Market Intelligence error:", err);
+      }
+    }
+
+    function renderMarketIntelligence(data) {
+      document.getElementById('mi-results-view').classList.remove('hidden');
+
+      const intel = data.intelligence || {};
+      const storage = data.storage_economics || {};
+      const arbitrage = data.top_arbitrage_destinations || [];
+      const faq = data.faq_quality_standards || [];
+
+      // Signal & Badge
+      const badge = document.getElementById('mi-action-badge');
+      badge.innerText = intel.action_badge || `${intel.action_signal} (Next 30 Days)`;
+      if ((intel.action_signal || '').includes('HOLD')) {
+        badge.className = "px-4 py-1.5 rounded-full text-sm font-black bg-emerald-600 text-white shadow";
+      } else {
+        badge.className = "px-4 py-1.5 rounded-full text-sm font-black bg-amber-600 text-white shadow";
+      }
+
+      document.getElementById('mi-current-price').innerText = `₹${(data.current_modal_price || 0).toLocaleString('en-IN')}/Qtl`;
+      document.getElementById('mi-msp-status').innerText = `${data.vs_msp_diff >= 0 ? '+' : ''}₹${data.vs_msp_diff} vs MSP (₹${data.msp_benchmark})`;
+      document.getElementById('mi-price-15d').innerText = `₹${(intel.price_15d_expected || 0).toLocaleString('en-IN')}/Qtl`;
+      document.getElementById('mi-price-30d').innerText = `₹${(intel.price_30d_expected || 0).toLocaleString('en-IN')}/Qtl`;
+      document.getElementById('mi-reasoning').innerText = intel.reasoning || intel.primary_catalyst;
+
+      // Storage Economics
+      const sBadge = document.getElementById('mi-storage-viable-badge');
+      sBadge.innerText = storage.viable ? "Highly Profitable Storage" : "Immediate Dispatch Advised";
+      sBadge.className = storage.viable
+        ? "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800"
+        : "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800";
+
+      document.getElementById('mi-storage-gross-gain').innerText = `+₹${storage.expected_gain_per_qtl} / Qtl`;
+      document.getElementById('mi-storage-interest').innerText = `-₹${storage.interest_cost_per_qtl} / Qtl`;
+      document.getElementById('mi-storage-net-qtl').innerText = `${storage.net_gain_per_qtl >= 0 ? '+' : ''}₹${storage.net_gain_per_qtl} / Qtl`;
+      document.getElementById('mi-storage-total-gain').innerText = `${storage.net_total_gain_inr >= 0 ? '+' : ''}₹${(storage.net_total_gain_inr || 0).toLocaleString('en-IN')}`;
+
+      // Buyer Clusters
+      document.getElementById('mi-buyer-cluster').innerText = intel.buyer_cluster || "Regional APMC Processors";
+      document.getElementById('mi-demand-intensity').innerText = intel.demand_intensity || "High";
+      document.getElementById('mi-arrival-trend').innerText = intel.arrival_trend || "Declining";
+
+      // FAQ Specs
+      const faqCont = document.getElementById('mi-faq-container');
+      faqCont.innerHTML = '';
+      faq.forEach(item => {
+        const d = document.createElement('div');
+        d.className = "flex justify-between py-1.5 px-3 bg-slate-50 rounded-lg border border-slate-100";
+        d.innerHTML = `<span class="text-slate-600 font-medium">${item.parameter}</span><span class="font-bold text-slate-900">${item.standard}</span>`;
+        faqCont.appendChild(d);
+      });
+
+      // Arbitrage Router Table
+      const arbTbody = document.getElementById('mi-arbitrage-tbody');
+      arbTbody.innerHTML = '';
+      arbitrage.forEach((r, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = idx === 0 ? "bg-emerald-50/70 font-semibold" : "hover:bg-slate-50";
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-bold ${idx === 0 ? 'text-emerald-700' : 'text-slate-500'}">#${idx + 1} ${idx === 0 ? '⭐ Best' : ''}</td>
+          <td class="py-3 px-4 font-bold text-slate-800">${r.mandi_name} (${r.state})</td>
+          <td class="py-3 px-4 text-slate-600">${r.distance_km} km</td>
+          <td class="py-3 px-4 font-bold text-slate-900">₹${r.modal_price.toLocaleString('en-IN')}</td>
+          <td class="py-3 px-4 text-slate-600">-₹${r.transport_cost.toLocaleString('en-IN')}</td>
+          <td class="py-3 px-4 text-slate-600">-₹${r.apmc_cess.toLocaleString('en-IN')}</td>
+          <td class="py-3 px-4 font-black ${r.net_profit >= 0 ? 'text-emerald-700' : 'text-red-600'}">₹${r.net_profit.toLocaleString('en-IN')}</td>
+          <td class="py-3 px-4 font-extrabold text-emerald-800">₹${r.net_rate_per_qtl.toLocaleString('en-IN')}</td>
+        `;
+        arbTbody.appendChild(tr);
+      });
+
+      lucide.createIcons();
+    }
+
+    // Initialize on Page Load
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      fetchWeather(19.7515, 75.7139, "Maharashtra");
+      loadMandiPrices();
+    });
+  </script>
+</body>
+</html>

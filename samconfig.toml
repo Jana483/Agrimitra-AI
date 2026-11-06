@@ -1,0 +1,17 @@
+version = 0.1
+
+[default.global.parameters]
+region = "ap-southeast-2"
+
+[default.build.parameters]
+template_file = "infrastructure/template.yaml"
+
+[default.deploy.parameters]
+template_file = "infrastructure/template.yaml"
+stack_name = "agrimitra-ai"
+region = "ap-southeast-2"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+resolve_s3 = true
+disable_rollback = false
+parameter_overrides = "BedrockModelId=amazon.nova-lite-v1:0"

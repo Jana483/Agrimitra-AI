@@ -1,0 +1,364 @@
+{
+  "crops": [
+    {
+      "id": "wheat",
+      "name": "Wheat",
+      "name_hi": "गेहूं",
+      "category": "Cereal",
+      "seasons": ["Rabi"],
+      "suitable_soils": ["Alluvial Soil", "Clay Loam", "Black Soil"],
+      "water_requirement": "Medium",
+      "water_mm": "400 - 550 mm",
+      "duration_days": "115 - 135",
+      "sowing_window": "October 25 - November 25",
+      "harvest_window": "March 20 - April 25",
+      "cost_per_acre": 16500,
+      "yield_per_acre_qtl": 20,
+      "net_margin_per_acre": 31000,
+      "ideal_npk": [120, 60, 40],
+      "optimal_ph": [6.2, 7.8],
+      "fertilizer_schedule": [
+        { "stage": "Basal (At Sowing)", "nutrients": "DAP 50 kg + MOP 25 kg + Zinc Sulphate 10 kg per acre", "timing": "Day 0" },
+        { "stage": "First Irrigation (CRI Stage)", "nutrients": "Urea 45 kg or Nano Urea foliar spray", "timing": "20 - 25 DAS" },
+        { "stage": "Tillering & Jointing", "nutrients": "Urea 35 kg + Micronutrient blend", "timing": "40 - 45 DAS" },
+        { "stage": "Booting / Heading", "nutrients": "Foliar spray of 00:52:34 (1 kg/acre) for grain plumping", "timing": "70 - 75 DAS" }
+      ],
+      "pest_management": [
+        { "pest": "Yellow Rust (पीला रतुआ)", "remedy": "Spray Propiconazole 25% EC (Tilt) @ 1 ml/L upon first yellow stripe sighting." },
+        { "pest": "Aphids / Mahu (माहू)", "remedy": "Spray Neem Oil (10,000 ppm) @ 3 ml/L or Thiamethoxam 25% WG @ 0.5 g/L." }
+      ],
+      "crop_rotation_benefit": "Rotates exceptionally well after Kharif Soyabean or Moong, which fix residual nitrogen in soil.",
+      "climate_risk": {
+        "heatwave_sensitivity": "High (terminal heat in Feb/March lowers grain filling)",
+        "unseasonal_rain_sensitivity": "High at harvest stage",
+        "drought_tolerance": "Moderate"
+      },
+      "resilient_alternatives": ["Mustard", "Chana (Gram)", "Barley"],
+      "advisory_tip": "If late sowing occurs after Dec 1st, switch to heat-tolerant varieties like PBW 771 or DBW 187."
+    },
+    {
+      "id": "paddy",
+      "name": "Paddy (Rice)",
+      "name_hi": "धान / चावल",
+      "category": "Cereal",
+      "seasons": ["Kharif"],
+      "suitable_soils": ["Clay Loam", "Alluvial Soil", "Black Soil"],
+      "water_requirement": "High",
+      "water_mm": "1100 - 1400 mm",
+      "duration_days": "120 - 145",
+      "sowing_window": "June 15 - July 20",
+      "harvest_window": "October 15 - November 25",
+      "cost_per_acre": 22000,
+      "yield_per_acre_qtl": 24,
+      "net_margin_per_acre": 33200,
+      "ideal_npk": [100, 50, 50],
+      "optimal_ph": [5.5, 7.2],
+      "fertilizer_schedule": [
+        { "stage": "Basal (Transplanting)", "nutrients": "DAP 45 kg + MOP 30 kg + Zinc 10 kg per acre", "timing": "Day 0" },
+        { "stage": "Early Tillering", "nutrients": "Urea 40 kg per acre", "timing": "21 - 25 DAT" },
+        { "stage": "Panicle Initiation", "nutrients": "Urea 30 kg + MOP 15 kg for strong stem support", "timing": "45 - 50 DAT" }
+      ],
+      "pest_management": [
+        { "pest": "Stem Borer / Leaf Folder", "remedy": "Install pheromone traps (5/acre); apply Chlorantraniliprole 18.5% SC @ 0.3 ml/L." },
+        { "pest": "Bacterial Leaf Blight (BLB)", "remedy": "Drain excess water, spray Streptocycline 1.5 g + Copper Oxychloride 25 g in 10 L water." }
+      ],
+      "crop_rotation_benefit": "Follow with Rabi pulses (Chana/Lentil) to restore depleted soil structure and break pest cycles.",
+      "climate_risk": {
+        "heatwave_sensitivity": "Moderate",
+        "unseasonal_rain_sensitivity": "Moderate",
+        "drought_tolerance": "Low (extreme vulnerability to delayed monsoon)"
+      },
+      "resilient_alternatives": ["Maize", "Millets (Bajra / Ragi)", "Soyabean"],
+      "advisory_tip": "Adopt Direct Seeded Rice (DSR) or Alternate Wetting & Drying (AWD) to cut water use by 30%."
+    },
+    {
+      "id": "soyabean",
+      "name": "Soyabean",
+      "name_hi": "सोयाबीन",
+      "category": "Oilseed",
+      "seasons": ["Kharif"],
+      "suitable_soils": ["Black Soil", "Alluvial Soil"],
+      "water_requirement": "Medium",
+      "water_mm": "500 - 650 mm",
+      "duration_days": "90 - 105",
+      "sowing_window": "June 20 - July 15",
+      "harvest_window": "September 25 - October 25",
+      "cost_per_acre": 14000,
+      "yield_per_acre_qtl": 10,
+      "net_margin_per_acre": 36000,
+      "ideal_npk": [30, 60, 40],
+      "optimal_ph": [6.0, 7.5],
+      "fertilizer_schedule": [
+        { "stage": "Basal Application", "nutrients": "DAP 50 kg + MOP 20 kg + Sulphur Bentonite 10 kg per acre", "timing": "At Sowing" },
+        { "stage": "Pre-Flowering", "nutrients": "Foliar spray of 19:19:19 (1 kg) + Boron (100g) in 100L water", "timing": "30 - 35 DAS" },
+        { "stage": "Pod Development", "nutrients": "Spray 00:52:34 (1.5 kg/acre) to maximize seed weight and oil content", "timing": "55 - 60 DAS" }
+      ],
+      "pest_management": [
+        { "pest": "Girdle Beetle & Spodoptera", "remedy": "Spray Emamectin Benzoate 5% SG @ 4 g/10 L water or Chlorantraniliprole." },
+        { "pest": "Yellow Mosaic Virus (YMV)", "remedy": "Control whitefly vectors using yellow sticky traps (10/acre) and Acetamiprid." }
+      ],
+      "crop_rotation_benefit": "Fixes 35-40 kg atmospheric nitrogen per acre, reducing next season's wheat/mustard fertilizer cost by 25%.",
+      "climate_risk": {
+        "heatwave_sensitivity": "Low",
+        "unseasonal_rain_sensitivity": "High during pod maturity and harvesting",
+        "drought_tolerance": "Moderate"
+      },
+      "resilient_alternatives": ["Tur (Arhar)", "Moong", "Cotton"],
+      "advisory_tip": "Plant on broad bed furrow (BBF) ridges to avoid waterlogging during heavy rainfall bursts."
+    },
+    {
+      "id": "mustard",
+      "name": "Mustard",
+      "name_hi": "सरसों",
+      "category": "Oilseed",
+      "seasons": ["Rabi"],
+      "suitable_soils": ["Alluvial Soil", "Sandy Loam", "Black Soil"],
+      "water_requirement": "Low",
+      "water_mm": "250 - 350 mm",
+      "duration_days": "105 - 125",
+      "sowing_window": "October 1 - October 25",
+      "harvest_window": "February 15 - March 15",
+      "cost_per_acre": 9500,
+      "yield_per_acre_qtl": 8.5,
+      "net_margin_per_acre": 39500,
+      "ideal_npk": [60, 40, 20],
+      "optimal_ph": [6.0, 7.8],
+      "fertilizer_schedule": [
+        { "stage": "Basal", "nutrients": "DAP 35 kg + SSP 50 kg (for vital Sulphur) + MOP 15 kg per acre", "timing": "Day 0" },
+        { "stage": "First Irrigation (Rosette)", "nutrients": "Urea 35 kg per acre", "timing": "30 - 35 DAS" },
+        { "stage": "Flowering Stage", "nutrients": "Sulphur 80% WDG spray (2 g/L) to enhance oil percentage", "timing": "55 - 60 DAS" }
+      ],
+      "pest_management": [
+        { "pest": "Mustard Aphid (चेपा / माहू)", "remedy": "Spray Dimethoate 30% EC @ 1.5 ml/L or Imidacloprid 17.8% SL @ 0.5 ml/L when temperature rises in Jan." }
+      ],
+      "crop_rotation_benefit": "Low water user; leaves soil in fine tilth for summer mungbean or early bajra.",
+      "climate_risk": {
+        "heatwave_sensitivity": "Moderate",
+        "unseasonal_rain_sensitivity": "High (aphid surge if cloudy/rainy in Jan)",
+        "drought_tolerance": "High"
+      },
+      "resilient_alternatives": ["Chana (Gram)", "Safflower", "Linseed"],
+      "advisory_tip": "Excellent low-water alternative to wheat; gives higher profit margin per drop of water."
+    },
+    {
+      "id": "tur",
+      "name": "Tur (Arhar / Pigeon Pea)",
+      "name_hi": "अरहर / तुअर दाल",
+      "category": "Pulse",
+      "seasons": ["Kharif"],
+      "suitable_soils": ["Black Soil", "Red Soil", "Sandy Loam"],
+      "water_requirement": "Low",
+      "water_mm": "400 - 550 mm",
+      "duration_days": "150 - 180",
+      "sowing_window": "June 15 - July 10",
+      "harvest_window": "December 15 - January 30",
+      "cost_per_acre": 13500,
+      "yield_per_acre_qtl": 8,
+      "net_margin_per_acre": 47000,
+      "ideal_npk": [25, 50, 25],
+      "optimal_ph": [6.0, 8.0],
+      "fertilizer_schedule": [
+        { "stage": "Basal Placement", "nutrients": "DAP 40 kg + MOP 15 kg + Rhizobium culture seed coating", "timing": "Day 0" },
+        { "stage": "Flower Bud Initiation", "nutrients": "Foliar spray of 00:52:34 (1.5 kg/acre) + Planofix (0.25 ml/L) to prevent flower drop", "timing": "70 - 80 DAS" },
+        { "stage": "Pod Filling", "nutrients": "Spray 13:00:45 (Potassium Nitrate) @ 10 g/L for plump grain formation", "timing": "110 - 120 DAS" }
+      ],
+      "pest_management": [
+        { "pest": "Pod Borer (Helicoverpa armigera)", "remedy": "Install 4 bird perches and 5 pheromone traps/acre; spray HaNPV or Chlorantraniliprole @ 0.3 ml/L." },
+        { "pest": "Fusarium Wilt", "remedy": "Seed treatment with Trichoderma viride @ 10 g/kg seed; ensure soil drainage." }
+      ],
+      "crop_rotation_benefit": "Deep taproots aerate subsoil down to 2 meters and fix massive amounts of nitrogen for subsequent crops.",
+      "climate_risk": {
+        "heatwave_sensitivity": "Low",
+        "unseasonal_rain_sensitivity": "Moderate during flowering",
+        "drought_tolerance": "Very High (deep taproot system)"
+      },
+      "resilient_alternatives": ["Moong", "Urad", "Soyabean"],
+      "advisory_tip": "Best crop for climate resilience in drought-prone Marathwada & North Karnataka."
+    },
+    {
+      "id": "cotton",
+      "name": "Cotton",
+      "name_hi": "कपास",
+      "category": "Commercial",
+      "seasons": ["Kharif"],
+      "suitable_soils": ["Black Soil", "Alluvial Soil"],
+      "water_requirement": "Medium",
+      "water_mm": "650 - 800 mm",
+      "duration_days": "150 - 170",
+      "sowing_window": "May 15 - June 25",
+      "harvest_window": "November 1 - January 15",
+      "cost_per_acre": 26000,
+      "yield_per_acre_qtl": 11,
+      "net_margin_per_acre": 56000,
+      "ideal_npk": [120, 60, 60],
+      "optimal_ph": [6.5, 8.2],
+      "fertilizer_schedule": [
+        { "stage": "Basal", "nutrients": "DAP 50 kg + MOP 30 kg + Magnesium Sulphate 10 kg per acre", "timing": "Day 0" },
+        { "stage": "Squaring Stage", "nutrients": "Urea 35 kg per acre + Zinc EDTA spray", "timing": "40 - 45 DAS" },
+        { "stage": "Peak Flowering", "nutrients": "Urea 35 kg + MOP 20 kg per acre", "timing": "70 - 75 DAS" },
+        { "stage": "Boll Development", "nutrients": "Foliar spray of 13:00:45 (10 g/L) to prevent boll reddening", "timing": "95 - 105 DAS" }
+      ],
+      "pest_management": [
+        { "pest": "Pink Bollworm (गुलाबी सुंडी)", "remedy": "Pheromone traps (8/acre). Spray Profenofos 50% EC @ 2 ml/L at 60 DAS if trap catches exceed 8 moths/day." },
+        { "pest": "Sucking Pests (Whitefly/Jassids)", "remedy": "Spray Flonicamid 50% WG @ 0.4 g/L or Neem oil (10,000 ppm)." }
+      ],
+      "crop_rotation_benefit": "Rotate with Wheat or Pulses to disrupt bollworm cycle and reduce pesticide load.",
+      "climate_risk": {
+        "heatwave_sensitivity": "Moderate",
+        "unseasonal_rain_sensitivity": "High at boll opening stage (discolors lint)",
+        "drought_tolerance": "Moderate"
+      },
+      "resilient_alternatives": ["Groundnut", "Soyabean", "Tur"],
+      "advisory_tip": "Monitor bollworm with pheromone traps; avoid late-stage pesticide overdose."
+    },
+    {
+      "id": "chana",
+      "name": "Chana (Chickpea / Gram)",
+      "name_hi": "चना",
+      "category": "Pulse",
+      "seasons": ["Rabi"],
+      "suitable_soils": ["Black Soil", "Clay Loam", "Sandy Loam"],
+      "water_requirement": "Low",
+      "water_mm": "250 - 350 mm",
+      "duration_days": "100 - 115",
+      "sowing_window": "October 15 - November 15",
+      "harvest_window": "February 20 - March 20",
+      "cost_per_acre": 11000,
+      "yield_per_acre_qtl": 9,
+      "net_margin_per_acre": 38000,
+      "ideal_npk": [20, 50, 20],
+      "optimal_ph": [6.0, 7.8],
+      "fertilizer_schedule": [
+        { "stage": "Basal Placement", "nutrients": "DAP 40 kg + Sulphur 10 kg per acre", "timing": "At Sowing" },
+        { "stage": "Pre-Flowering", "nutrients": "Spray 02% Urea or 19:19:19 (10 g/L) + Boron (1 g/L)", "timing": "40 - 45 DAS" },
+        { "stage": "Pod Initiation", "nutrients": "Spray 00:52:34 (15 g/L) to prevent premature flower drop", "timing": "65 - 70 DAS" }
+      ],
+      "pest_management": [
+        { "pest": "Gram Pod Borer (हेलीकोवर्पा)", "remedy": "Set up 4 bird perches per acre; spray Emamectin Benzoate @ 4 g/10 L at early instar stage." }
+      ],
+      "crop_rotation_benefit": "N-fixing champion; adds fertility and requires almost zero irrigation in conservation tillage.",
+      "climate_risk": {
+        "heatwave_sensitivity": "Moderate",
+        "unseasonal_rain_sensitivity": "High during flowering (blight & wilt)",
+        "drought_tolerance": "High"
+      },
+      "resilient_alternatives": ["Mustard", "Lentil (Masoor)"],
+      "advisory_tip": "Requires zero or only 1-2 supplemental irrigations; restores soil nitrogen naturally."
+    },
+    {
+      "id": "bajra",
+      "name": "Bajra (Pearl Millet / Shree Anna)",
+      "name_hi": "बाजरा (श्री अन्न)",
+      "category": "Millet",
+      "seasons": ["Kharif", "Zaid"],
+      "suitable_soils": ["Sandy Loam", "Red Soil", "Alluvial Soil"],
+      "water_requirement": "Low",
+      "water_mm": "200 - 350 mm",
+      "duration_days": "80 - 90",
+      "sowing_window": "June 25 - July 20",
+      "harvest_window": "September 15 - October 15",
+      "cost_per_acre": 7500,
+      "yield_per_acre_qtl": 14,
+      "net_margin_per_acre": 29000,
+      "ideal_npk": [60, 30, 20],
+      "optimal_ph": [6.0, 8.5],
+      "fertilizer_schedule": [
+        { "stage": "Basal", "nutrients": "DAP 25 kg + MOP 15 kg per acre", "timing": "Day 0" },
+        { "stage": "Tillering Stage", "nutrients": "Urea 30 kg per acre after weeding", "timing": "25 - 30 DAS" }
+      ],
+      "pest_management": [
+        { "pest": "Downy Mildew & Shoot Fly", "remedy": "Seed treatment with Metalaxyl @ 2 g/kg seed; ensure timely sowing before July 15." }
+      ],
+      "crop_rotation_benefit": "Tolerates salinity and heat; ideal crop to restore abandoned or water-depleted acreage.",
+      "climate_risk": {
+        "heatwave_sensitivity": "Extremely Low (tolerates up to 45°C)",
+        "unseasonal_rain_sensitivity": "Low",
+        "drought_tolerance": "Very High (supreme climate resilience)"
+      },
+      "resilient_alternatives": ["Jowar", "Ragi", "Moong"],
+      "advisory_tip": "Ideal for arid zones; high market demand under National Millet Mission with rising MSP."
+    },
+    {
+      "id": "onion",
+      "name": "Onion",
+      "name_hi": "प्याज",
+      "category": "Vegetable",
+      "seasons": ["Rabi", "Kharif", "Late Kharif"],
+      "suitable_soils": ["Sandy Loam", "Alluvial Soil", "Red Soil"],
+      "water_requirement": "Medium",
+      "water_mm": "450 - 600 mm",
+      "duration_days": "110 - 130",
+      "sowing_window": "November 1 - December 15 (Rabi)",
+      "harvest_window": "April 1 - May 15",
+      "cost_per_acre": 32000,
+      "yield_per_acre_qtl": 80,
+      "net_margin_per_acre": 164000,
+      "ideal_npk": [100, 50, 80],
+      "optimal_ph": [6.2, 7.5],
+      "fertilizer_schedule": [
+        { "stage": "Basal", "nutrients": "DAP 45 kg + MOP 40 kg + Sulphur 15 kg (crucial for pungency and storage life)", "timing": "Transplanting" },
+        { "stage": "Vegetative Growth", "nutrients": "Urea 35 kg per acre", "timing": "30 DAT" },
+        { "stage": "Bulb Initiation", "nutrients": "Urea 35 kg + MOP 20 kg per acre", "timing": "45 - 50 DAT" },
+        { "stage": "Bulb Enlargement", "nutrients": "Spray 00:00:50 (Potassium Sulphate) @ 10 g/L; stop irrigation 15 days before harvest", "timing": "75 - 80 DAT" }
+      ],
+      "pest_management": [
+        { "pest": "Thrips (थ्रिप्स / रतुआ)", "remedy": "Install blue sticky traps (15/acre); spray Fipronil 5% SC @ 1.5 ml/L or Spinosad @ 0.3 ml/L." },
+        { "pest": "Purple Blotch (बैंगनी धब्बा)", "remedy": "Spray Mancozeb 75% WP @ 2.5 g/L + Tebuconazole @ 1 ml/L." }
+      ],
+      "crop_rotation_benefit": "Deep bulb cultivation loosens soil structure; rotate with pulses or cereals to curb soil pathogens.",
+      "climate_risk": {
+        "heatwave_sensitivity": "Moderate",
+        "unseasonal_rain_sensitivity": "Extreme (causes bulb rotting & fungal diseases)",
+        "drought_tolerance": "Moderate"
+      },
+      "resilient_alternatives": ["Garlic", "Potato", "Turmeric"],
+      "advisory_tip": "High profit volatility; invest in raised beds and solar-ventilated storage structures."
+    },
+    {
+      "id": "tomato",
+      "name": "Tomato",
+      "name_hi": "टमाटर",
+      "category": "Vegetable",
+      "seasons": ["Kharif", "Rabi", "Zaid"],
+      "suitable_soils": ["Sandy Loam", "Red Soil", "Black Soil"],
+      "water_requirement": "Medium",
+      "water_mm": "400 - 600 mm",
+      "duration_days": "100 - 120",
+      "sowing_window": "July - August (Kharif) / Oct - Nov (Rabi)",
+      "harvest_window": "Continuous flush over 45 days",
+      "cost_per_acre": 35000,
+      "yield_per_acre_qtl": 120,
+      "net_margin_per_acre": 163000,
+      "ideal_npk": [120, 80, 100],
+      "optimal_ph": [6.0, 7.0],
+      "fertilizer_schedule": [
+        { "stage": "Basal", "nutrients": "DAP 60 kg + MOP 50 kg + Neem Cake 100 kg per acre", "timing": "Transplanting" },
+        { "stage": "Flowering & Fruit Set", "nutrients": "Fertigation with 19:19:19 (3 kg/acre/week) + Calcium Nitrate 2 kg/acre (prevents Blossom End Rot)", "timing": "35 - 60 DAT" },
+        { "stage": "Harvest Flushes", "nutrients": "Fertigation with 00:00:50 (4 kg/acre/week) for firm texture and red color", "timing": "60 - 90 DAT" }
+      ],
+      "pest_management": [
+        { "pest": "Tomato Leaf Miner (Tuta absoluta) & Whitefly", "remedy": "Pheromone lures; spray Cyantraniliprole 10.26% OD @ 1.8 ml/L." },
+        { "pest": "Early & Late Blight", "remedy": "Prophylactic spray of Copper Hydroxide (2 g/L) before rainy spell; Azoxystrobin (1 ml/L) for curatives." }
+      ],
+      "crop_rotation_benefit": "Avoid planting after potato or chilli (solanaceous family); rotate with maize or cowpea.",
+      "climate_risk": {
+        "heatwave_sensitivity": "High (flower drop above 35°C)",
+        "unseasonal_rain_sensitivity": "Very High (Early & Late Blight)",
+        "drought_tolerance": "Low"
+      },
+      "resilient_alternatives": ["Chilli", "Capsicum", "Okra"],
+      "advisory_tip": "Staking and drip fertigation increase yield by 40% and protect against wet soil rot."
+    }
+  ],
+  "states_data": [
+    { "state": "Maharashtra", "primary_soils": ["Black Soil", "Red Soil"], "major_districts": ["Nashik", "Pune", "Nagpur", "Aurangabad", "Amravati", "Solapur"], "lat": 19.7515, "lon": 75.7139 },
+    { "state": "Madhya Pradesh", "primary_soils": ["Black Soil", "Alluvial Soil"], "major_districts": ["Indore", "Ujjain", "Bhopal", "Jabalpur", "Hoshangabad"], "lat": 22.9734, "lon": 78.6569 },
+    { "state": "Punjab", "primary_soils": ["Alluvial Soil", "Clay Loam"], "major_districts": ["Ludhiana", "Amritsar", "Bathinda", "Jalandhar", "Patiala"], "lat": 31.1471, "lon": 75.3412 },
+    { "state": "Haryana", "primary_soils": ["Alluvial Soil", "Sandy Loam"], "major_districts": ["Karnal", "Hisar", "Sirsa", "Kurukshetra", "Ambala"], "lat": 29.0588, "lon": 76.0856 },
+    { "state": "Rajasthan", "primary_soils": ["Sandy Loam", "Alluvial Soil", "Black Soil"], "major_districts": ["Kota", "Jaipur", "Sri Ganganagar", "Jodhpur", "Alwar"], "lat": 27.0238, "lon": 74.2179 },
+    { "state": "Gujarat", "primary_soils": ["Black Soil", "Sandy Loam", "Alluvial Soil"], "major_districts": ["Rajkot", "Junagadh", "Mehsana", "Surat", "Amreli"], "lat": 22.2587, "lon": 71.1924 },
+    { "state": "Uttar Pradesh", "primary_soils": ["Alluvial Soil", "Clay Loam", "Sandy Loam"], "major_districts": ["Bareilly", "Varanasi", "Lucknow", "Agra", "Meerut"], "lat": 26.8467, "lon": 80.9462 },
+    { "state": "Karnataka", "primary_soils": ["Red Soil", "Black Soil"], "major_districts": ["Kalaburagi", "Belagavi", "Dharwad", "Mysuru", "Ballari"], "lat": 15.3173, "lon": 75.7139 },
+    { "state": "Andhra Pradesh", "primary_soils": ["Red Soil", "Black Soil", "Alluvial Soil"], "major_districts": ["Guntur", "Kurnool", "Anantapur", "Krishna", "West Godavari"], "lat": 15.9129, "lon": 79.7400 }
+  ]
+}

@@ -1,0 +1,369 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: AgriMitra AI on AWS in ap-southeast-2.
+
+Parameters:
+  BedrockModelId:
+    Type: String
+    Default: amazon.nova-lite-v1:0
+    Description: Bedrock model used for farmer Q&A. Enable this model in the Bedrock console first.
+  DomainName:
+    Type: String
+    Default: ""
+    Description: Optional farmer-facing domain, such as app.example.com.
+  HostedZoneId:
+    Type: String
+    Default: ""
+    Description: Route 53 hosted zone id. Leave empty to skip DNS.
+
+Conditions:
+  CreateDns: !And
+    - !Not [!Equals [!Ref DomainName, ""]]
+    - !Not [!Equals [!Ref HostedZoneId, ""]]
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 512
+    Runtime: python3.12
+    Architectures: [x86_64]
+    Tracing: Active
+
+Resources:
+  AppKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: Encrypts AgriMitra profiles, reports, and API secrets.
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AccountRoot
+            Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action: "kms:*"
+            Resource: "*"
+          - Sid: AwsServices
+            Effect: Allow
+            Principal:
+              Service:
+                - dynamodb.amazonaws.com
+                - s3.amazonaws.com
+                - secretsmanager.amazonaws.com
+                - cloudfront.amazonaws.com
+            Action:
+              - kms:Decrypt
+              - kms:Encrypt
+              - kms:GenerateDataKey
+              - kms:DescribeKey
+            Resource: "*"
+
+  AppKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: alias/agrimitra-ai
+      TargetKeyId: !Ref AppKey
+
+  WeatherSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub agrimitra/${AWS::StackName}/weather
+      Description: OpenWeather and IMD keys. Open-Meteo works without a key.
+      KmsKeyId: !Ref AppKey
+      SecretString: '{"OPENWEATHER_API_KEY":"","IMD_API_KEY":""}'
+
+  RecordsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      TableName: !Sub agrimitra-${AWS::StackName}
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
+      SSESpecification:
+        SSEEnabled: true
+        SSEType: KMS
+        KMSMasterKeyId: !Ref AppKey
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+  ReportsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub agrimitra-reports-${AWS::AccountId}-${AWS::Region}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !Ref AppKey
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  WebsiteBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub agrimitra-web-${AWS::AccountId}-${AWS::Region}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  WebsiteOAC:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub ${AWS::StackName}-website
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  HttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: prod
+      CorsConfiguration:
+        AllowOrigins: ["*"]
+        AllowMethods: [GET, POST, OPTIONS]
+        AllowHeaders: ["*"]
+
+  DecisionFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AWS::StackName}-api
+      CodeUri: ..
+      Handler: lambda_handler.handler
+      Description: Crop, climate, mandi, and Bedrock advisory API.
+      Environment:
+        Variables:
+          DYNAMODB_TABLE: !Ref RecordsTable
+          REPORTS_BUCKET: !Ref ReportsBucket
+          BEDROCK_MODEL_ID: !Ref BedrockModelId
+          WEATHER_SECRET_ARN: !Ref WeatherSecret
+          COGNITO_USER_POOL_ID: !Ref UserPool
+          COGNITO_APP_CLIENT_ID: !Ref UserPoolClient
+          KMS_KEY_ID: !Ref AppKey
+          AGRIMITRA_AWS: "true"
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RecordsTable
+        - S3CrudPolicy:
+            BucketName: !Ref ReportsBucket
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - bedrock:InvokeModel
+                - bedrock:Converse
+              Resource:
+                - !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/*
+                - !Sub arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/*
+            - Effect: Allow
+              Action: secretsmanager:GetSecretValue
+              Resource: !Ref WeatherSecret
+            - Effect: Allow
+              Action:
+                - kms:Decrypt
+                - kms:GenerateDataKey
+                - kms:DescribeKey
+              Resource: !GetAtt AppKey.Arn
+            - Effect: Allow
+              Action:
+                - xray:PutTraceSegments
+                - xray:PutTelemetryRecords
+              Resource: "*"
+      Events:
+        Proxy:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /{proxy+}
+            Method: ANY
+            PayloadFormatVersion: "2.0"
+        Root:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /
+            Method: ANY
+            PayloadFormatVersion: "2.0"
+
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub ${AWS::StackName}-users
+      UsernameAttributes: [email]
+      AutoVerifiedAttributes: [email]
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+      Schema:
+        - Name: email
+          Required: true
+          Mutable: true
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: agrimitra-web
+      UserPoolId: !Ref UserPool
+      GenerateSecret: false
+      ExplicitAuthFlows:
+        - ALLOW_USER_SRP_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+        - ALLOW_USER_PASSWORD_AUTH
+      PreventUserExistenceErrors: ENABLED
+
+  FarmerGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: farmer
+      Description: Farmer login
+      UserPoolId: !Ref UserPool
+
+  AdminGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: admin
+      Description: Admin login
+      UserPoolId: !Ref UserPool
+
+  Distribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: AgriMitra AI
+        DefaultRootObject: index.html
+        HttpVersion: http2
+        Origins:
+          - Id: website
+            DomainName: !GetAtt WebsiteBucket.RegionalDomainName
+            OriginAccessControlId: !GetAtt WebsiteOAC.Id
+            S3OriginConfig:
+              OriginAccessIdentity: ""
+          - Id: api
+            DomainName: !Sub ${HttpApi}.execute-api.${AWS::Region}.amazonaws.com
+            CustomOriginConfig:
+              OriginProtocolPolicy: https-only
+              HTTPSPort: 443
+        DefaultCacheBehavior:
+          TargetOriginId: website
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods: [GET, HEAD, OPTIONS]
+          CachedMethods: [GET, HEAD, OPTIONS]
+          Compress: true
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+        CacheBehaviors:
+          - PathPattern: /api/*
+            TargetOriginId: api
+            ViewerProtocolPolicy: https-only
+            AllowedMethods: [GET, HEAD, OPTIONS, PUT, PATCH, POST, DELETE]
+            CachedMethods: [GET, HEAD, OPTIONS]
+            Compress: true
+            CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad
+            OriginRequestPolicyId: b689b0a8-53d0-40ab-baf2-68738e2966ac
+        PriceClass: PriceClass_200
+
+  WebsiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref WebsiteBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowCloudFront
+            Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub ${WebsiteBucket.Arn}/*
+            Condition:
+              StringEquals:
+                AWS:SourceAccount: !Ref AWS::AccountId
+              StringLike:
+                AWS:SourceArn: !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/*
+
+  Dashboard:
+    Type: AWS::CloudWatch::Dashboard
+    Properties:
+      DashboardName: !Sub ${AWS::StackName}-ops
+      DashboardBody: !Sub |
+        {
+          "widgets": [
+            {
+              "type": "metric",
+              "x": 0, "y": 0, "width": 12, "height": 6,
+              "properties": {
+                "title": "API errors and duration",
+                "region": "${AWS::Region}",
+                "metrics": [
+                  ["AWS/Lambda", "Errors", "FunctionName", "${DecisionFunction}"],
+                  ["AWS/Lambda", "Duration", "FunctionName", "${DecisionFunction}"]
+                ],
+                "view": "timeSeries",
+                "stat": "Sum",
+                "period": 300
+              }
+            },
+            {
+              "type": "metric",
+              "x": 12, "y": 0, "width": 12, "height": 6,
+              "properties": {
+                "title": "Farmer records",
+                "region": "${AWS::Region}",
+                "metrics": [
+                  ["AWS/DynamoDB", "ConsumedReadCapacityUnits", "TableName", "${RecordsTable}"],
+                  ["AWS/DynamoDB", "ConsumedWriteCapacityUnits", "TableName", "${RecordsTable}"]
+                ],
+                "view": "timeSeries",
+                "period": 300
+              }
+            }
+          ]
+        }
+
+  DnsRecord:
+    Type: AWS::Route53::RecordSet
+    Condition: CreateDns
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Ref DomainName
+      Type: A
+      AliasTarget:
+        DNSName: !GetAtt Distribution.DomainName
+        HostedZoneId: Z2FDTNDATAQYW2
+        EvaluateTargetHealth: false
+
+Outputs:
+  Region:
+    Value: !Ref AWS::Region
+  ApiUrl:
+    Value: !Sub https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com
+  CloudFrontUrl:
+    Value: !Sub https://${Distribution.DomainName}
+  WebsiteBucketName:
+    Value: !Ref WebsiteBucket
+  ReportsBucketName:
+    Value: !Ref ReportsBucket
+  RecordsTableName:
+    Value: !Ref RecordsTable
+  UserPoolId:
+    Value: !Ref UserPool
+  UserPoolClientId:
+    Value: !Ref UserPoolClient
+  SecretArn:
+    Value: !Ref WeatherSecret
+  DashboardName:
+    Value: !Ref Dashboard

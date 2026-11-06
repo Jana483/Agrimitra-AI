@@ -1,0 +1,171 @@
+{
+  "last_updated": "2026-10-18T20:30:00+05:30",
+  "msp_data": {
+    "Wheat": 2275,
+    "Paddy (Common)": 2300,
+    "Paddy (Grade A)": 2320,
+    "Cotton (Medium)": 7121,
+    "Cotton (Long)": 7521,
+    "Soyabean": 4892,
+    "Mustard": 5650,
+    "Chana (Gram)": 5440,
+    "Tur (Arhar)": 7550,
+    "Moong": 8682,
+    "Maize": 2225,
+    "Bajra": 2625,
+    "Jowar (Hybrid)": 3371,
+    "Ragi": 4290,
+    "Groundnut": 6783,
+    "Sunflower": 7280,
+    "Onion": 1800,
+    "Potato": 1200,
+    "Tomato": 1500
+  },
+  "mandis": [
+    {
+      "id": "mandi-01",
+      "name": "Lasalgaon APMC",
+      "district": "Nashik",
+      "state": "Maharashtra",
+      "lat": 20.1472,
+      "lon": 74.2285,
+      "speciality": "Asia's largest onion market",
+      "commodities": [
+        { "crop": "Onion", "modal_price": 2450, "min_price": 1900, "max_price": 2780, "change_pct": 3.4, "trend": "rising", "arrival_tonnes": 1850, "demand": "High" },
+        { "crop": "Tomato", "modal_price": 1650, "min_price": 1200, "max_price": 1900, "change_pct": -1.2, "trend": "falling", "arrival_tonnes": 420, "demand": "Moderate" },
+        { "crop": "Soyabean", "modal_price": 4920, "min_price": 4650, "max_price": 5080, "change_pct": 0.8, "trend": "steady", "arrival_tonnes": 310, "demand": "High" },
+        { "crop": "Maize", "modal_price": 2280, "min_price": 2100, "max_price": 2360, "change_pct": 1.1, "trend": "steady", "arrival_tonnes": 540, "demand": "Moderate" }
+      ]
+    },
+    {
+      "id": "mandi-02",
+      "name": "Azadpur APMC",
+      "district": "North Delhi",
+      "state": "Delhi",
+      "lat": 28.7164,
+      "lon": 77.1728,
+      "speciality": "National transit mega-hub for fruits & vegetables",
+      "commodities": [
+        { "crop": "Onion", "modal_price": 2850, "min_price": 2400, "max_price": 3150, "change_pct": 4.1, "trend": "rising", "arrival_tonnes": 2400, "demand": "Very High" },
+        { "crop": "Tomato", "modal_price": 2100, "min_price": 1750, "max_price": 2400, "change_pct": 2.5, "trend": "rising", "arrival_tonnes": 1100, "demand": "High" },
+        { "crop": "Potato", "modal_price": 1620, "min_price": 1350, "max_price": 1800, "change_pct": -0.5, "trend": "steady", "arrival_tonnes": 1950, "demand": "High" },
+        { "crop": "Wheat", "modal_price": 2420, "min_price": 2300, "max_price": 2550, "change_pct": 1.2, "trend": "rising", "arrival_tonnes": 850, "demand": "Moderate" }
+      ]
+    },
+    {
+      "id": "mandi-03",
+      "name": "Khanna APMC",
+      "district": "Ludhiana",
+      "state": "Punjab",
+      "lat": 30.7027,
+      "lon": 76.2163,
+      "speciality": "Asia's largest grain market",
+      "commodities": [
+        { "crop": "Wheat", "modal_price": 2380, "min_price": 2275, "max_price": 2480, "change_pct": 0.4, "trend": "steady", "arrival_tonnes": 3800, "demand": "High" },
+        { "crop": "Paddy (Common)", "modal_price": 2340, "min_price": 2300, "max_price": 2420, "change_pct": 0.9, "trend": "steady", "arrival_tonnes": 4500, "demand": "High" },
+        { "crop": "Paddy (Grade A)", "modal_price": 2410, "min_price": 2320, "max_price": 2500, "change_pct": 1.3, "trend": "rising", "arrival_tonnes": 2100, "demand": "High" },
+        { "crop": "Maize", "modal_price": 2240, "min_price": 2150, "max_price": 2320, "change_pct": -0.6, "trend": "steady", "arrival_tonnes": 680, "demand": "Moderate" }
+      ]
+    },
+    {
+      "id": "mandi-04",
+      "name": "Indore APMC (Choithram)",
+      "district": "Indore",
+      "state": "Madhya Pradesh",
+      "lat": 22.7196,
+      "lon": 75.8577,
+      "speciality": "Central India Soyabean & Wheat trade hub",
+      "commodities": [
+        { "crop": "Soyabean", "modal_price": 5050, "min_price": 4820, "max_price": 5240, "change_pct": 2.1, "trend": "rising", "arrival_tonnes": 2900, "demand": "Very High" },
+        { "crop": "Wheat", "modal_price": 2520, "min_price": 2380, "max_price": 2720, "change_pct": 1.7, "trend": "rising", "arrival_tonnes": 2100, "demand": "High" },
+        { "crop": "Chana (Gram)", "modal_price": 5850, "min_price": 5500, "max_price": 6120, "change_pct": 2.8, "trend": "rising", "arrival_tonnes": 1400, "demand": "High" },
+        { "crop": "Potato", "modal_price": 1450, "min_price": 1200, "max_price": 1600, "change_pct": -1.4, "trend": "falling", "arrival_tonnes": 880, "demand": "Moderate" }
+      ]
+    },
+    {
+      "id": "mandi-05",
+      "name": "Guntur APMC",
+      "district": "Guntur",
+      "state": "Andhra Pradesh",
+      "lat": 16.3067,
+      "lon": 80.4365,
+      "speciality": "Major hub for commercial crops, cotton, and chillies",
+      "commodities": [
+        { "crop": "Cotton (Long)", "modal_price": 7820, "min_price": 7500, "max_price": 8150, "change_pct": 1.9, "trend": "rising", "arrival_tonnes": 1750, "demand": "High" },
+        { "crop": "Paddy (Common)", "modal_price": 2360, "min_price": 2300, "max_price": 2450, "change_pct": 0.5, "trend": "steady", "arrival_tonnes": 3100, "demand": "High" },
+        { "crop": "Maize", "modal_price": 2310, "min_price": 2200, "max_price": 2390, "change_pct": 1.4, "trend": "rising", "arrival_tonnes": 820, "demand": "Moderate" }
+      ]
+    },
+    {
+      "id": "mandi-06",
+      "name": "Rajkot APMC",
+      "district": "Rajkot",
+      "state": "Gujarat",
+      "lat": 22.3039,
+      "lon": 70.8022,
+      "speciality": "Primary Saurashtra market for Cotton and Groundnut",
+      "commodities": [
+        { "crop": "Cotton (Medium)", "modal_price": 7380, "min_price": 7100, "max_price": 7650, "change_pct": 1.2, "trend": "rising", "arrival_tonnes": 2600, "demand": "High" },
+        { "crop": "Groundnut", "modal_price": 7100, "min_price": 6700, "max_price": 7350, "change_pct": 2.4, "trend": "rising", "arrival_tonnes": 1900, "demand": "Very High" },
+        { "crop": "Mustard", "modal_price": 5780, "min_price": 5550, "max_price": 5950, "change_pct": 0.9, "trend": "steady", "arrival_tonnes": 950, "demand": "Moderate" },
+        { "crop": "Chana (Gram)", "modal_price": 5720, "min_price": 5450, "max_price": 5920, "change_pct": 1.5, "trend": "rising", "arrival_tonnes": 820, "demand": "High" }
+      ]
+    },
+    {
+      "id": "mandi-07",
+      "name": "Kota APMC (Bhamashah Mandi)",
+      "district": "Kota",
+      "state": "Rajasthan",
+      "lat": 25.2138,
+      "lon": 75.8648,
+      "speciality": "Hadoti region powerhouse for Soyabean, Mustard, Wheat",
+      "commodities": [
+        { "crop": "Soyabean", "modal_price": 4980, "min_price": 4750, "max_price": 5160, "change_pct": 1.0, "trend": "steady", "arrival_tonnes": 2200, "demand": "High" },
+        { "crop": "Mustard", "modal_price": 5820, "min_price": 5600, "max_price": 6050, "change_pct": 2.2, "trend": "rising", "arrival_tonnes": 1600, "demand": "Very High" },
+        { "crop": "Wheat", "modal_price": 2440, "min_price": 2320, "max_price": 2540, "change_pct": 0.8, "trend": "steady", "arrival_tonnes": 1800, "demand": "Moderate" }
+      ]
+    },
+    {
+      "id": "mandi-08",
+      "name": "Kalaburagi (Gulbarga) APMC",
+      "district": "Kalaburagi",
+      "state": "Karnataka",
+      "lat": 17.3297,
+      "lon": 76.8343,
+      "speciality": "Pulse bowl of Karnataka (Tur / Pigeon Pea)",
+      "commodities": [
+        { "crop": "Tur (Arhar)", "modal_price": 8150, "min_price": 7600, "max_price": 8600, "change_pct": 3.2, "trend": "rising", "arrival_tonnes": 1450, "demand": "Very High" },
+        { "crop": "Moong", "modal_price": 8820, "min_price": 8500, "max_price": 9150, "change_pct": 1.6, "trend": "rising", "arrival_tonnes": 680, "demand": "High" },
+        { "crop": "Cotton (Medium)", "modal_price": 7280, "min_price": 7050, "max_price": 7500, "change_pct": 0.7, "trend": "steady", "arrival_tonnes": 920, "demand": "Moderate" }
+      ]
+    },
+    {
+      "id": "mandi-09",
+      "name": "Vashi APMC (Navi Mumbai)",
+      "district": "Thane / Navi Mumbai",
+      "state": "Maharashtra",
+      "lat": 19.0760,
+      "lon": 72.9984,
+      "speciality": "Western port and metropolitan consumer terminal",
+      "commodities": [
+        { "crop": "Onion", "modal_price": 2920, "min_price": 2500, "max_price": 3250, "change_pct": 3.8, "trend": "rising", "arrival_tonnes": 2100, "demand": "Very High" },
+        { "crop": "Tomato", "modal_price": 2250, "min_price": 1800, "max_price": 2550, "change_pct": 2.1, "trend": "rising", "arrival_tonnes": 1300, "demand": "High" },
+        { "crop": "Potato", "modal_price": 1700, "min_price": 1400, "max_price": 1920, "change_pct": 0.2, "trend": "steady", "arrival_tonnes": 1650, "demand": "High" }
+      ]
+    },
+    {
+      "id": "mandi-10",
+      "name": "Karnal APMC",
+      "district": "Karnal",
+      "state": "Haryana",
+      "lat": 29.6857,
+      "lon": 76.9905,
+      "speciality": "Premier Basmati Rice and Wheat procurement center",
+      "commodities": [
+        { "crop": "Paddy (Grade A)", "modal_price": 3450, "min_price": 3200, "max_price": 3800, "change_pct": 2.6, "trend": "rising", "arrival_tonnes": 3200, "demand": "Very High" },
+        { "crop": "Wheat", "modal_price": 2390, "min_price": 2280, "max_price": 2490, "change_pct": 0.5, "trend": "steady", "arrival_tonnes": 2800, "demand": "High" },
+        { "crop": "Mustard", "modal_price": 5760, "min_price": 5550, "max_price": 5980, "change_pct": 1.1, "trend": "rising", "arrival_tonnes": 890, "demand": "Moderate" }
+      ]
+    }
+  ]
+}
