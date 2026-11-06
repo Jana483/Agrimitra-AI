@@ -123,21 +123,20 @@ def get_weather():
     location_name = request.args.get('name', 'Central Zone')
 
     weather_data = aws_platform.fetch_openweather(lat, lon)
-    try:
-        if weather_data:
-            raise RuntimeError("weather already loaded")
-        # OpenWeather is used when a key is configured. Otherwise use Open-Meteo.
-        url = (
-            f"https://api.open-meteo.com/v1/forecast?"
-            f"latitude={lat}&longitude={lon}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m"
-            f"&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max"
-            f"&timezone=Asia%2FKolkata"
-        )
-        resp = requests.get(url, timeout=4)
-        if resp.status_code == 200:
-            weather_data = resp.json()
-    except Exception as e:
-        app.logger.warning(f"Open-Meteo live API unavailable ({e}), using reliable agricultural climate simulation.")
+    if not weather_data:
+        try:
+            # OpenWeather is used when a key is configured. Otherwise use Open-Meteo.
+            url = (
+                f"https://api.open-meteo.com/v1/forecast?"
+                f"latitude={lat}&longitude={lon}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m"
+                f"&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max"
+                f"&timezone=Asia%2FKolkata"
+            )
+            resp = requests.get(url, timeout=4)
+            if resp.status_code == 200:
+                weather_data = resp.json()
+        except Exception as e:
+            app.logger.warning(f"Open-Meteo live API unavailable ({e}), using reliable agricultural climate simulation.")
 
     # Fallback simulation if Open-Meteo is unreachable
     if not weather_data or 'current' not in weather_data:
