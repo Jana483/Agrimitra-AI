@@ -115,7 +115,8 @@
       </div>
 
       <!-- TABS NAVIGATION -->
-      <nav class="flex space-x-6 overflow-x-auto text-sm border-t border-slate-100 scrollbar-none" id="main-nav">
+      <div class="flex items-center gap-3 border-t border-slate-100">
+      <nav class="flex flex-1 space-x-6 overflow-x-auto text-sm scrollbar-none" id="main-nav">
         <button onclick="switchTab('climate')" id="tab-climate" class="py-3 px-1 text-slate-600 hover:text-brand-700 font-medium flex items-center gap-2 border-b-2 border-transparent transition tab-active whitespace-nowrap">
           <i data-lucide="cloud-sun-rain" class="w-4 h-4 text-emerald-600"></i>
           <span class="tab-label-weather">Climate & Weather Advisory</span>
@@ -149,6 +150,8 @@
           <span class="tab-label-advisor">AgriMitra AI Assistant</span>
         </button>
       </nav>
+      <button id="feature-tour-toggle" type="button" onclick="toggleFeatureTour()" class="shrink-0 my-2 mr-1 px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-700 text-white hover:bg-emerald-800 transition whitespace-nowrap">Pause tour</button>
+      </div>
     </div>
   </header>
 
@@ -1642,15 +1645,29 @@
     }
 
     // Tab Switching
-    function switchTab(tabId) {
-      const panels = ['climate', 'climate-advisor-tool', 'mandi', 'market-intel-tool', 'arbitrage', 'crop-engine', 'ai-advisor-tool', 'advisor'];
+    const FEATURE_TABS = ['climate', 'climate-advisor-tool', 'mandi', 'market-intel-tool', 'arbitrage', 'crop-engine', 'ai-advisor-tool', 'advisor'];
+    let featureTourIndex = 0;
+    let featureTourTimer = null;
+    let featureTourPaused = false;
+
+    function switchTab(tabId, options) {
+      const fromTour = options && options.fromTour;
+      const panels = FEATURE_TABS;
       panels.forEach(p => {
         document.getElementById(`panel-${p}`).classList.add('hidden');
         document.getElementById(`tab-${p}`).classList.remove('tab-active');
       });
 
       document.getElementById(`panel-${tabId}`).classList.remove('hidden');
-      document.getElementById(`tab-${tabId}`).classList.add('tab-active');
+      const activeTab = document.getElementById(`tab-${tabId}`);
+      activeTab.classList.add('tab-active');
+      const nav = document.getElementById('main-nav');
+      if (nav && activeTab) {
+        nav.scrollTo({ left: Math.max(0, activeTab.offsetLeft - 16), behavior: 'smooth' });
+      }
+      const nextIndex = FEATURE_TABS.indexOf(tabId);
+      if (nextIndex >= 0) featureTourIndex = nextIndex;
+      if (!fromTour) pauseFeatureTour();
 
       if (tabId === 'mandi' && !trendChartInstance) {
         loadPriceTrends('Soyabean');
@@ -1667,6 +1684,31 @@
         runClimateRiskAssessment();
       }
       lucide.createIcons();
+    }
+
+    function rotateFeature() {
+      if (featureTourPaused) return;
+      featureTourIndex = (featureTourIndex + 1) % FEATURE_TABS.length;
+      switchTab(FEATURE_TABS[featureTourIndex], { fromTour: true });
+    }
+
+    function pauseFeatureTour() {
+      featureTourPaused = true;
+      const btn = document.getElementById('feature-tour-toggle');
+      if (btn) btn.textContent = 'Resume tour';
+    }
+
+    function toggleFeatureTour() {
+      featureTourPaused = !featureTourPaused;
+      const btn = document.getElementById('feature-tour-toggle');
+      if (btn) btn.textContent = featureTourPaused ? 'Resume tour' : 'Pause tour';
+      if (!featureTourPaused) rotateFeature();
+    }
+
+    function startFeatureTour() {
+      if (featureTourTimer) clearInterval(featureTourTimer);
+      featureTourPaused = false;
+      featureTourTimer = setInterval(rotateFeature, 12000);
     }
 
     // Speech Synthesis
@@ -2543,6 +2585,7 @@
       lucide.createIcons();
       fetchWeather(19.7515, 75.7139, "Maharashtra");
       loadMandiPrices();
+      startFeatureTour();
     });
   </script>
 </body>
